@@ -6,9 +6,6 @@ import Footer from "@/components/Footer";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { motion } from "framer-motion";
 
-// Install framer-motion for animations
-<lov-add-dependency>framer-motion@latest</lov-add-dependency>
-
 const Index = () => {
   return (
     <LanguageProvider>
