@@ -1,53 +1,66 @@
 
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
-import { LanguageSelector } from "./LanguageSelector";
-import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { User, LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Header = () => {
   const { t } = useLanguage();
+  const { user, logout } = useAuth();
 
   return (
-    <motion.header 
-      className="w-full py-6 px-6 sm:px-8 glass-panel rounded-b-2xl bg-opacity-95 backdrop-blur-lg shadow-sm z-10 sticky top-0 border-b border-sky-100"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-    >
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="flex items-center">
-          <motion.div
-            className="w-10 h-10 bg-sky-500 rounded-full flex items-center justify-center"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              viewBox="0 0 24 24" 
-              className="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-            </svg>
-          </motion.div>
-          <motion.h1 
-            className="text-2xl sm:text-3xl font-serif font-semibold text-sky-700 ml-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-          >
-            {t('appName')}
-          </motion.h1>
-        </div>
-        
-        <nav className="flex items-center gap-6">
+    <header className="bg-white border-b border-sky-100 sticky top-0 z-10">
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        <Link to="/" className="font-serif text-sky-700 text-xl font-medium">
+          {t("appName")}
+        </Link>
+
+        <nav className="flex items-center gap-2">
           <LanguageSelector />
+          
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="relative h-9 px-3 text-slate-700 hover:bg-sky-50">
+                  <User className="h-4 w-4 mr-2" />
+                  <span className="font-medium truncate max-w-[100px]">{user.name}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>{t("account")}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem disabled>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>{t("profile")}</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="text-red-500 focus:text-red-500">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>{t("logout")}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button asChild variant="ghost" size="sm" className="h-9 px-3 text-slate-700 hover:bg-sky-50">
+              <Link to="/login">
+                <User className="h-4 w-4 mr-2" />
+                <span className="font-medium">{t("login")}</span>
+              </Link>
+            </Button>
+          )}
         </nav>
       </div>
-    </motion.header>
+    </header>
   );
 };
 

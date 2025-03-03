@@ -80,6 +80,107 @@ const translations = {
     pt: "Espanhol",
     en: "Spanish",
     es: "Español"
+  },
+  // Authentication
+  login: {
+    pt: "Entrar",
+    en: "Login",
+    es: "Iniciar sesión"
+  },
+  loggingIn: {
+    pt: "Entrando...",
+    en: "Logging in...",
+    es: "Iniciando sesión..."
+  },
+  register: {
+    pt: "Cadastrar",
+    en: "Register",
+    es: "Registrarse"
+  },
+  registering: {
+    pt: "Cadastrando...",
+    en: "Registering...",
+    es: "Registrándose..."
+  },
+  email: {
+    pt: "Email",
+    en: "Email",
+    es: "Correo electrónico"
+  },
+  password: {
+    pt: "Senha",
+    en: "Password",
+    es: "Contraseña"
+  },
+  confirmPassword: {
+    pt: "Confirmar senha",
+    en: "Confirm password",
+    es: "Confirmar contraseña"
+  },
+  name: {
+    pt: "Nome",
+    en: "Name",
+    es: "Nombre"
+  },
+  namePlaceholder: {
+    pt: "Seu nome completo",
+    en: "Your full name",
+    es: "Su nombre completo"
+  },
+  forgotPassword: {
+    pt: "Esqueceu sua senha?",
+    en: "Forgot password?",
+    es: "¿Olvidó su contraseña?"
+  },
+  dontHaveAccount: {
+    pt: "Não tem uma conta?",
+    en: "Don't have an account?",
+    es: "¿No tiene una cuenta?"
+  },
+  alreadyHaveAccount: {
+    pt: "Já tem uma conta?",
+    en: "Already have an account?",
+    es: "¿Ya tiene una cuenta?"
+  },
+  loginMessage: {
+    pt: "Entre para acessar sua jornada espiritual",
+    en: "Sign in to access your spiritual journey",
+    es: "Inicie sesión para acceder a su jornada espiritual"
+  },
+  registerMessage: {
+    pt: "Crie sua conta para iniciar sua jornada espiritual",
+    en: "Create your account to start your spiritual journey",
+    es: "Cree su cuenta para comenzar su jornada espiritual"
+  },
+  passwordsDoNotMatch: {
+    pt: "As senhas não coincidem",
+    en: "Passwords do not match",
+    es: "Las contraseñas no coinciden"
+  },
+  passwordTooShort: {
+    pt: "A senha deve ter pelo menos 6 caracteres",
+    en: "Password must be at least 6 characters",
+    es: "La contraseña debe tener al menos 6 caracteres"
+  },
+  account: {
+    pt: "Conta",
+    en: "Account",
+    es: "Cuenta"
+  },
+  profile: {
+    pt: "Perfil",
+    en: "Profile",
+    es: "Perfil"
+  },
+  logout: {
+    pt: "Sair",
+    en: "Logout",
+    es: "Cerrar sesión"
+  },
+  backToHome: {
+    pt: "Voltar para o início",
+    en: "Back to home",
+    es: "Volver al inicio"
   }
 };
 
