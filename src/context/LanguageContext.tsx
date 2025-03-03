@@ -1,7 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-// Tipos de dados
 type SupportedLanguage = "pt" | "en" | "es";
 
 interface LanguageContextType {
@@ -10,14 +8,86 @@ interface LanguageContextType {
   t: (key: string) => string;
 }
 
-interface TranslationsType {
-  [key: string]: {
-    [key: string]: string;
-  };
+interface Translations {
+  appName: string;
+  welcomeMessage: string;
+  sendMessage: string;
+  typeMessage: string;
+  search: string;
+  history: string;
+  dailyVerse: string;
+  readMore: string;
+  shareVerse: string;
+  settings: string;
+  about: string;
+  login: string;
+  register: string;
+  logout: string;
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  name: string;
+  namePlaceholder: string;
+  forgotPassword: string;
+  resetPassword: string;
+  loginMessage: string;
+  registerMessage: string;
+  loggingIn: string;
+  registering: string;
+  dontHaveAccount: string;
+  alreadyHaveAccount: string;
+  backToHome: string;
+  passwordsDoNotMatch: string;
+  passwordTooShort: string;
+  conversations: string;
+  newChat: string;
+  favorites: string;
+  folders: string;
+  createFolder: string;
+  editFolder: string;
+  deleteFolder: string;
+  folderName: string;
+  save: string;
+  cancel: string;
+  delete: string;
+  edit: string;
+  confirmDelete: string;
+  searchConversations: string;
+  noResults: string;
+  addToFolder: string;
+  removeFromFolder: string;
+  folderNameRequired: string;
+  folderCreated: string;
+  folderUpdated: string;
+  folderDeleted: string;
+  messageFavorited: string;
+  messageUnfavorited: string;
+  profile: string;
+  myAccount: string;
+  appearance: string;
+  helpCenter: string;
+  selectFolder: string;
+  createNewFolder: string;
+  deleteConversation: string;
+  conversationDeleted: string;
+  copyToClipboard: string;
+  copied: string;
+  darkMode: string;
+  lightMode: string;
+  systemDefault: string;
+  language: string;
+  feedback: string;
+  sendFeedback: string;
+  termsOfService: string;
+  privacyPolicy: string;
+  emptyFolders: string;
+  emptyFavorites: string;
+  emptyHistory: string;
+  reflectionTitle: string;
 }
 
-// Objeto de traduções
-const translations: TranslationsType = {
+const translations: Record<SupportedLanguage, Translations> = {
   pt: {
     appName: "Deus é Amor",
     welcomeMessage: "Bem-vindo ao Deus é Amor",
@@ -94,6 +164,7 @@ const translations: TranslationsType = {
     emptyFolders: "Você não tem pastas",
     emptyFavorites: "Você não tem favoritos",
     emptyHistory: "Você não tem histórico",
+    reflectionTitle: "Reflexão do Dia",
   },
   en: {
     appName: "God is Love",
@@ -171,6 +242,7 @@ const translations: TranslationsType = {
     emptyFolders: "You don't have any folders",
     emptyFavorites: "You don't have any favorites",
     emptyHistory: "You don't have any history",
+    reflectionTitle: "Daily Reflection",
   },
   es: {
     appName: "Dios es Amor",
@@ -248,15 +320,13 @@ const translations: TranslationsType = {
     emptyFolders: "No tienes carpetas",
     emptyFavorites: "No tienes favoritos",
     emptyHistory: "No tienes historial",
+    reflectionTitle: "Reflexión del Día",
   },
 };
 
-// Criação do contexto
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-// Provider component
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  // Detecta o idioma do navegador ou usa português como padrão
   const detectBrowserLanguage = (): SupportedLanguage => {
     const browserLang = navigator.language.split("-")[0];
     return (browserLang === "pt" || browserLang === "en" || browserLang === "es") 
@@ -264,18 +334,15 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       : "pt";
   };
 
-  // Estado para armazenar o idioma atual
   const [language, setLanguage] = useState<SupportedLanguage>(() => {
     const savedLanguage = localStorage.getItem("language") as SupportedLanguage;
     return savedLanguage || detectBrowserLanguage();
   });
 
-  // Atualiza o localStorage quando o idioma muda
   useEffect(() => {
     localStorage.setItem("language", language);
   }, [language]);
 
-  // Função para traduzir as chaves
   const t = (key: string): string => {
     return translations[language][key] || key;
   };
@@ -287,7 +354,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Hook personalizado para usar o contexto
 export const useLanguage = (): LanguageContextType => {
   const context = useContext(LanguageContext);
   

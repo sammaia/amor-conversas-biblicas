@@ -3,6 +3,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { getDailyVerse } from "@/data/verses";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const DailyVerse = () => {
   const { language, t } = useLanguage();
@@ -40,6 +41,21 @@ const DailyVerse = () => {
           >
             — {verse.reference[language]}
           </motion.p>
+          
+          {verse.context && (
+            <>
+              <Separator className="my-4 bg-sky-100" />
+              <motion.div
+                className="mt-4 px-4 text-slate-600"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.0, duration: 0.7 }}
+              >
+                <h3 className="text-sm font-medium text-sky-700 mb-2">{t("reflectionTitle")}</h3>
+                <p className="text-sm leading-relaxed">{verse.context[language]}</p>
+              </motion.div>
+            </>
+          )}
         </CardContent>
       </Card>
     </motion.div>
