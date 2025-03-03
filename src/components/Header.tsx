@@ -1,5 +1,5 @@
 
-import { LanguageSelector } from "@/components/LanguageSelector";
+import LanguageSelector from "@/components/LanguageSelector";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
