@@ -1,29 +1,32 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useChat } from "@/context/ChatContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send } from "lucide-react";
+import { Send, Star, StarOff, FolderPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
-
-interface Message {
-  id: string;
-  text: string;
-  sender: "user" | "assistant";
-}
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Message } from "@/types/chat";
+import FolderSelector from "@/components/FolderSelector";
 
 const Chat = () => {
   const { t, language } = useLanguage();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "welcome",
-      text: t("chatWelcome"),
-      sender: "assistant",
-    },
-  ]);
+  const { 
+    currentConversation, 
+    addMessage, 
+    toggleFavorite,
+  } = useChat();
   const [input, setInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showFolderSelector, setShowFolderSelector] = useState(false);
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -32,19 +35,7 @@ const Chat = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
-
-  // Update welcome message when language changes
-  useEffect(() => {
-    setMessages((prevMessages) => [
-      {
-        id: "welcome",
-        text: t("chatWelcome"),
-        sender: "assistant",
-      },
-      ...prevMessages.slice(1),
-    ]);
-  }, [language, t]);
+  }, [currentConversation?.messages]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -54,13 +45,7 @@ const Chat = () => {
     e.preventDefault();
     if (!input.trim() || isSubmitting) return;
 
-    const userMessage = {
-      id: Date.now().toString(),
-      text: input.trim(),
-      sender: "user" as const,
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    addMessage(input.trim(), "user");
     setInput("");
     setIsSubmitting(true);
 
@@ -76,13 +61,7 @@ const Chat = () => {
       
       const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
       
-      const assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        text: randomResponse,
-        sender: "assistant" as const,
-      };
-      
-      setMessages((prev) => [...prev, assistantMessage]);
+      addMessage(randomResponse, "assistant");
       setIsSubmitting(false);
     }, 1000);
   };
@@ -93,6 +72,17 @@ const Chat = () => {
       handleSubmit(e);
     }
   };
+
+  const handleFavoriteClick = (messageId: string) => {
+    toggleFavorite(messageId);
+  };
+
+  const handleAddToFolder = (messageId: string) => {
+    setSelectedMessageId(messageId);
+    setShowFolderSelector(true);
+  };
+
+  const messages = currentConversation?.messages || [];
 
   return (
     <motion.div 
@@ -110,24 +100,60 @@ const Chat = () => {
         <CardContent className="p-0">
           <div className="h-[400px] overflow-y-auto p-4 bg-white bg-opacity-70 scroll-smooth">
             <AnimatePresence initial={false}>
-              {messages.map((message, index) => (
+              {messages.map((message) => (
                 <motion.div
                   key={message.id}
                   className={`flex ${
                     message.sender === "user" ? "justify-end" : "justify-start"
-                  } mb-4`}
+                  } mb-4 group`}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <div
-                    className={`max-w-[80%] p-3 rounded-2xl ${
-                      message.sender === "user"
-                        ? "bg-sky-500 text-white rounded-tr-none"
-                        : "bg-slate-100 text-slate-800 rounded-tl-none"
-                    }`}
-                  >
-                    <p className="text-sm sm:text-base">{message.text}</p>
+                  <div className="relative">
+                    <div
+                      className={`max-w-[80%] p-3 rounded-2xl ${
+                        message.sender === "user"
+                          ? "bg-sky-500 text-white rounded-tr-none"
+                          : "bg-slate-100 text-slate-800 rounded-tl-none"
+                      }`}
+                    >
+                      <p className="text-sm sm:text-base">{message.text}</p>
+                    </div>
+                    
+                    <div className={`absolute top-2 ${message.sender === "user" ? "left-0 -translate-x-full -ml-2" : "right-0 translate-x-full mr-2"} opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1`}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full text-amber-500 hover:text-amber-600"
+                        onClick={() => handleFavoriteClick(message.id)}
+                      >
+                        {message.favorite ? (
+                          <StarOff className="h-3.5 w-3.5" />
+                        ) : (
+                          <Star className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
+                      
+                      {message.favorite && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full text-sky-500 hover:text-sky-600"
+                            >
+                              <FolderPlus className="h-3.5 w-3.5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-40">
+                            <DropdownMenuItem onClick={() => handleAddToFolder(message.id)}>
+                              {t("addToFolder")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
               ))}
@@ -156,6 +182,16 @@ const Chat = () => {
           </form>
         </CardContent>
       </Card>
+      
+      {showFolderSelector && selectedMessageId && (
+        <FolderSelector
+          messageId={selectedMessageId}
+          onClose={() => {
+            setShowFolderSelector(false);
+            setSelectedMessageId(null);
+          }}
+        />
+      )}
     </motion.div>
   );
 };

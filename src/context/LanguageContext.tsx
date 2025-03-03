@@ -1,229 +1,158 @@
-
-import React, { createContext, useContext, useState, ReactNode } from "react";
-
-export type Language = "pt" | "en" | "es";
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 
 interface LanguageContextType {
-  language: Language;
-  setLanguage: (language: Language) => void;
+  language: string;
   t: (key: string) => string;
+  setLanguage: (lang: string) => void;
 }
-
-const translations = {
-  // Header
-  appName: {
-    pt: "Deus é Amor",
-    en: "God is Love",
-    es: "Dios es Amor"
-  },
-  // Navigation
-  home: {
-    pt: "Início",
-    en: "Home",
-    es: "Inicio"
-  },
-  chat: {
-    pt: "Conversar",
-    en: "Chat",
-    es: "Chatear"
-  },
-  dailyVerse: {
-    pt: "Versículo do Dia",
-    en: "Daily Verse",
-    es: "Versículo del Día"
-  },
-  // Daily Verse
-  todaysVerse: {
-    pt: "Versículo de Hoje",
-    en: "Today's Verse",
-    es: "Versículo de Hoy"
-  },
-  // Chat
-  chatPlaceholder: {
-    pt: "Digite sua mensagem aqui...",
-    en: "Type your message here...",
-    es: "Escribe tu mensaje aquí..."
-  },
-  send: {
-    pt: "Enviar",
-    en: "Send",
-    es: "Enviar"
-  },
-  chatWelcome: {
-    pt: "Olá! Estou aqui para auxiliar em sua jornada espiritual. Como posso ajudar você hoje?",
-    en: "Hello! I'm here to assist you in your spiritual journey. How can I help you today?",
-    es: "¡Hola! Estoy aquí para ayudarte en tu jornada espiritual. ¿Cómo puedo ayudarte hoy?"
-  },
-  // Footer
-  footerText: {
-    pt: "Deus é Amor - Guia Espiritual e Bíblico",
-    en: "God is Love - Spiritual and Biblical Guide",
-    es: "Dios es Amor - Guía Espiritual y Bíblica"
-  },
-  // Language selector
-  languages: {
-    pt: "Idiomas",
-    en: "Languages",
-    es: "Idiomas"
-  },
-  portuguese: {
-    pt: "Português",
-    en: "Portuguese",
-    es: "Portugués"
-  },
-  english: {
-    pt: "Inglês",
-    en: "English",
-    es: "Inglés"
-  },
-  spanish: {
-    pt: "Espanhol",
-    en: "Spanish",
-    es: "Español"
-  },
-  // Authentication
-  login: {
-    pt: "Entrar",
-    en: "Login",
-    es: "Iniciar sesión"
-  },
-  loggingIn: {
-    pt: "Entrando...",
-    en: "Logging in...",
-    es: "Iniciando sesión..."
-  },
-  register: {
-    pt: "Cadastrar",
-    en: "Register",
-    es: "Registrarse"
-  },
-  registering: {
-    pt: "Cadastrando...",
-    en: "Registering...",
-    es: "Registrándose..."
-  },
-  email: {
-    pt: "Email",
-    en: "Email",
-    es: "Correo electrónico"
-  },
-  password: {
-    pt: "Senha",
-    en: "Password",
-    es: "Contraseña"
-  },
-  confirmPassword: {
-    pt: "Confirmar senha",
-    en: "Confirm password",
-    es: "Confirmar contraseña"
-  },
-  name: {
-    pt: "Nome",
-    en: "Name",
-    es: "Nombre"
-  },
-  namePlaceholder: {
-    pt: "Seu nome completo",
-    en: "Your full name",
-    es: "Su nombre completo"
-  },
-  forgotPassword: {
-    pt: "Esqueceu sua senha?",
-    en: "Forgot password?",
-    es: "¿Olvidó su contraseña?"
-  },
-  dontHaveAccount: {
-    pt: "Não tem uma conta?",
-    en: "Don't have an account?",
-    es: "¿No tiene una cuenta?"
-  },
-  alreadyHaveAccount: {
-    pt: "Já tem uma conta?",
-    en: "Already have an account?",
-    es: "¿Ya tiene una cuenta?"
-  },
-  loginMessage: {
-    pt: "Entre para acessar sua jornada espiritual",
-    en: "Sign in to access your spiritual journey",
-    es: "Inicie sesión para acceder a su jornada espiritual"
-  },
-  registerMessage: {
-    pt: "Crie sua conta para iniciar sua jornada espiritual",
-    en: "Create your account to start your spiritual journey",
-    es: "Cree su cuenta para comenzar su jornada espiritual"
-  },
-  passwordsDoNotMatch: {
-    pt: "As senhas não coincidem",
-    en: "Passwords do not match",
-    es: "Las contraseñas no coinciden"
-  },
-  passwordTooShort: {
-    pt: "A senha deve ter pelo menos 6 caracteres",
-    en: "Password must be at least 6 characters",
-    es: "La contraseña debe tener al menos 6 caracteres"
-  },
-  account: {
-    pt: "Conta",
-    en: "Account",
-    es: "Cuenta"
-  },
-  profile: {
-    pt: "Perfil",
-    en: "Profile",
-    es: "Perfil"
-  },
-  logout: {
-    pt: "Sair",
-    en: "Logout",
-    es: "Cerrar sesión"
-  },
-  backToHome: {
-    pt: "Voltar para o início",
-    en: "Back to home",
-    es: "Volver al inicio"
-  }
-};
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  // Try to get the browser language first, default to Portuguese
-  const getBrowserLanguage = (): Language => {
-    const browserLang = navigator.language.split('-')[0];
-    if (browserLang === 'pt' || browserLang === 'en' || browserLang === 'es') {
-      return browserLang as Language;
-    }
-    return 'pt'; // Default to Portuguese
+  const [language, setLanguage] = useState(localStorage.getItem("lang") || "pt");
+
+  useEffect(() => {
+    localStorage.setItem("lang", language);
+  }, [language]);
+
+  const translations = {
+    pt: {
+      appName: "Deus é Amor",
+      login: "Entrar",
+      register: "Cadastrar",
+      logout: "Sair",
+      profile: "Perfil",
+      account: "Conta",
+      todaysVerse: "Versículo do Dia",
+      chat: "Bate-papo",
+      chatWelcome: "Bem-vindo ao chat! Como posso ajudar você hoje?",
+      chatPlaceholder: "Escreva sua mensagem...",
+      send: "Enviar",
+      history: "Histórico",
+      favorites: "Favoritos",
+      folders: "Pastas",
+      newConversation: "Nova Conversa",
+      newFolder: "Nova Pasta",
+      search: "Buscar",
+      save: "Salvar",
+      cancel: "Cancelar",
+      delete: "Deletar",
+      edit: "Editar",
+      addToFolder: "Adicionar à pasta",
+      removeFromFolder: "Remover da pasta",
+      createFolder: "Criar pasta",
+      folderName: "Nome da pasta",
+      addedToFavorites: "Adicionado aos favoritos",
+      removedFromFavorites: "Removido dos favoritos",
+      folderCreated: "Pasta criada",
+      folderRenamed: "Pasta renomeada",
+      folderDeleted: "Pasta deletada",
+      addedToFolder: "Adicionado à pasta",
+      removedFromFolder: "Removido da pasta",
+      messageAlreadyInFolder: "Mensagem já está nesta pasta",
+      noFavorites: "Nenhum favorito ainda",
+      noFolders: "Nenhuma pasta criada",
+      noConversations: "Nenhuma conversa encontrada",
+      confirmDelete: "Confirmar exclusão",
+      conversationHistory: "Histórico de conversas",
+    },
+    en: {
+      appName: "God is Love",
+      login: "Login",
+      register: "Register",
+      logout: "Logout",
+      profile: "Profile",
+      account: "Account",
+      todaysVerse: "Today's Verse",
+      chat: "Chat",
+      chatWelcome: "Welcome to the chat! How can I help you today?",
+      chatPlaceholder: "Write your message...",
+      send: "Send",
+      history: "History",
+      favorites: "Favorites",
+      folders: "Folders",
+      newConversation: "New Conversation",
+      newFolder: "New Folder",
+      search: "Search",
+      save: "Save",
+      cancel: "Cancel",
+      delete: "Delete",
+      edit: "Edit",
+      addToFolder: "Add to folder",
+      removeFromFolder: "Remove from folder",
+      createFolder: "Create folder",
+      folderName: "Folder name",
+      addedToFavorites: "Added to favorites",
+      removedFromFavorites: "Removed from favorites",
+      folderCreated: "Folder created",
+      folderRenamed: "Folder renamed",
+      folderDeleted: "Folder deleted",
+      addedToFolder: "Added to folder",
+      removedFromFolder: "Removed from folder",
+      messageAlreadyInFolder: "Message is already in this folder",
+      noFavorites: "No favorites yet",
+      noFolders: "No folders created",
+      noConversations: "No conversations found",
+      confirmDelete: "Confirm deletion",
+      conversationHistory: "Conversation history",
+    },
+    es: {
+      appName: "Dios es Amor",
+      login: "Iniciar sesión",
+      register: "Registrarse",
+      logout: "Cerrar sesión",
+      profile: "Perfil",
+      account: "Cuenta",
+      todaysVerse: "Versículo del día",
+      chat: "Chat",
+      chatWelcome: "¡Bienvenido al chat! ¿Cómo puedo ayudarte hoy?",
+      chatPlaceholder: "Escribe tu mensaje...",
+      send: "Enviar",
+      history: "Historial",
+      favorites: "Favoritos",
+      folders: "Carpetas",
+      newConversation: "Nueva Conversación",
+      newFolder: "Nueva Carpeta",
+      search: "Buscar",
+      save: "Guardar",
+      cancel: "Cancelar",
+      delete: "Eliminar",
+      edit: "Editar",
+      addToFolder: "Añadir a carpeta",
+      removeFromFolder: "Quitar de carpeta",
+      createFolder: "Crear carpeta",
+      folderName: "Nombre de carpeta",
+      addedToFavorites: "Añadido a favoritos",
+      removedFromFavorites: "Quitado de favoritos",
+      folderCreated: "Carpeta creada",
+      folderRenamed: "Carpeta renombrada",
+      folderDeleted: "Carpeta eliminada",
+      addedToFolder: "Añadido a carpeta",
+      removedFromFolder: "Quitado de carpeta",
+      messageAlreadyInFolder: "El mensaje ya está en esta carpeta",
+      noFavorites: "Aún no hay favoritos",
+      noFolders: "No hay carpetas creadas",
+      noConversations: "No se encontraron conversaciones",
+      confirmDelete: "Confirmar eliminación",
+      conversationHistory: "Historial de conversaciones",
+    },
   };
 
-  const [language, setLanguage] = useState<Language>(getBrowserLanguage());
-
-  const t = (key: string): string => {
-    const keyPath = key.split('.');
-    let result: any = translations;
-    
-    for (const k of keyPath) {
-      if (result[k] === undefined) {
-        console.warn(`Translation key not found: ${key}`);
-        return key;
-      }
-      result = result[k];
-    }
-    
-    return result[language] || key;
-  };
+  const t = useCallback((key: string) => {
+    return translations[language as keyof typeof translations][key] || key;
+  }, [language]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, t, setLanguage }}>
       {children}
     </LanguageContext.Provider>
   );
 };
 
-export const useLanguage = (): LanguageContextType => {
+export const useLanguage = () => {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    throw new Error("useLanguage must be used within a LanguageProvider");
   }
   return context;
 };
