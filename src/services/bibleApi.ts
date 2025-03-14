@@ -1,4 +1,6 @@
 
+import { verses as localVerses } from "@/data/verses";
+
 interface BibleVersions {
   pt: string;
   en: string;
@@ -13,7 +15,7 @@ const BIBLE_VERSIONS: BibleVersions = {
 };
 
 // Esta chave deve ser substituída pela sua chave de API
-const API_KEY = "YOUR_API_KEY";
+const API_KEY = "62f59770e58ad92c1e32269ea76f695e";
 
 export interface BibleVerse {
   reference: {
@@ -118,7 +120,7 @@ const fetchVerseByReference = async (
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "api-key": "62f59770e58ad92c1e32269ea76f695e",
+        "api-key": API_KEY,
         "Content-Type": "application/json",
       },
     });
@@ -200,13 +202,10 @@ export const getDailyVerse = async (): Promise<BibleVerse> => {
  * Versículo local de fallback caso a API falhe
  */
 const getFallbackDailyVerse = (): BibleVerse => {
-  // Importa os versículos locais como fallback
-  const { verses } = require("@/data/verses");
-  
   // Seleciona um versículo com base no dia do ano
   const dayOfYear = Math.floor(
     (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
   );
   
-  return verses[dayOfYear % verses.length];
+  return localVerses[dayOfYear % localVerses.length];
 };
