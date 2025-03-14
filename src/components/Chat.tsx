@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Message } from "@/types/chat";
 import FolderSelector from "@/components/FolderSelector";
+import { sendMessageToOpenAI } from "@/services/openAIService";
 
 const Chat = () => {
   const { t, language } = useLanguage();
@@ -45,25 +46,21 @@ const Chat = () => {
     e.preventDefault();
     if (!input.trim() || isSubmitting) return;
 
-    addMessage(input.trim(), "user");
+    const userMessage = input.trim();
+    addMessage(userMessage, "user");
     setInput("");
     setIsSubmitting(true);
 
-    // Simulate AI response after a short delay
-    setTimeout(() => {
-      // This is a placeholder. In a real app, you would call an API for the response.
-      const botResponses = [
-        "A fé é a certeza das coisas que se esperam, e a prova das coisas que não se veem. (Hebreus 11:1)",
-        "Não temas, porque eu sou contigo; não te assombres, porque eu sou teu Deus; eu te fortaleço, e te ajudo, e te sustento com a destra da minha justiça. (Isaías 41:10)",
-        "Muitos são os planos no coração do homem, mas é o propósito do Senhor que permanece. (Provérbios 19:21)",
-        "O Senhor é a minha luz e a minha salvação; a quem temerei? O Senhor é a força da minha vida; de quem me recearei? (Salmos 27:1)",
-      ];
-      
-      const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
-      
-      addMessage(randomResponse, "assistant");
+    try {
+      // Enviar a mensagem para a OpenAI e receber a resposta
+      const botResponse = await sendMessageToOpenAI(userMessage, language);
+      addMessage(botResponse, "assistant");
+    } catch (error) {
+      console.error("Erro ao processar mensagem:", error);
+      addMessage(t("aiError"), "assistant");
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -118,7 +115,7 @@ const Chat = () => {
                           : "bg-slate-100 text-slate-800 rounded-tl-none"
                       }`}
                     >
-                      <p className="text-sm sm:text-base">{message.text}</p>
+                      <p className="text-sm sm:text-base whitespace-pre-wrap">{message.text}</p>
                     </div>
                     
                     <div className={`absolute top-2 ${message.sender === "user" ? "left-0 -translate-x-full -ml-2" : "right-0 translate-x-full mr-2"} opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1`}>
@@ -175,7 +172,11 @@ const Chat = () => {
                 disabled={isSubmitting} 
                 className="bg-sky-500 hover:bg-sky-600 text-white transition-colors duration-300"
               >
-                <Send className="h-5 w-5" />
+                {isSubmitting ? (
+                  <div className="h-5 w-5 border-2 border-t-transparent border-white rounded-full animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5" />
+                )}
                 <span className="sr-only">{t("send")}</span>
               </Button>
             </div>
