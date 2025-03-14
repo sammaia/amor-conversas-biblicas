@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import Header from "@/components/Header";
 import DailyVerse from "@/components/DailyVerse";
@@ -38,7 +39,7 @@ const Index = () => {
                 {t("appName")}
               </h1>
               <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto px-4">
-                {t("welcomeMessage")}
+                {t("appDescription")}
               </p>
             </motion.div>
 

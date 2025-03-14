@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 // Define as chaves disponíveis para tradução
@@ -13,6 +12,7 @@ export type TranslationKey =
   | "edit"
   | "delete"
   | "back"
+  | "appDescription"
   // Login e autenticação
   | "login"
   | "logout"
@@ -67,6 +67,7 @@ export type TranslationKey =
   | "addedToFavorites"
   | "removedFromFavorites"
   | "chatWelcome"
+  | "welcomeMessage"
   // Versículo do dia
   | "todaysVerse"
   | "verseLoadError"
@@ -93,6 +94,7 @@ const translations = {
     edit: "Editar",
     delete: "Excluir",
     back: "Voltar",
+    appDescription: "Converse com Deus e receba orientação espiritual através de palavras de amor e esperança baseadas na Bíblia.",
     // Login e autenticação
     login: "Entrar",
     logout: "Sair",
@@ -147,6 +149,7 @@ const translations = {
     addedToFavorites: "Adicionado aos favoritos",
     removedFromFavorites: "Removido dos favoritos",
     chatWelcome: "Olá! Como posso te ajudar hoje? Estou aqui para conversar e compartilhar palavras de amor, fé e esperança baseadas nas Escrituras.",
+    welcomeMessage: "Converse com Deus e receba orientação espiritual através de palavras de amor e esperança baseadas na Bíblia.",
     // Versículo do dia
     todaysVerse: "Versículo do Dia",
     verseLoadError: "Não foi possível carregar o versículo do dia",
@@ -164,6 +167,7 @@ const translations = {
     edit: "Edit",
     delete: "Delete",
     back: "Back",
+    appDescription: "Chat with God and receive spiritual guidance through words of love and hope based on the Bible.",
     // Login e autenticação
     login: "Login",
     logout: "Logout",
@@ -218,6 +222,7 @@ const translations = {
     addedToFavorites: "Added to favorites",
     removedFromFavorites: "Removed from favorites",
     chatWelcome: "Hello! How can I help you today? I'm here to chat and share words of love, faith, and hope based on the Scriptures.",
+    welcomeMessage: "Chat with God and receive spiritual guidance through words of love and hope based on the Bible.",
     // Versículo do dia
     todaysVerse: "Verse of the Day",
     verseLoadError: "Could not load today's verse",
@@ -235,6 +240,7 @@ const translations = {
     edit: "Editar",
     delete: "Eliminar",
     back: "Volver",
+    appDescription: "Conversa con Dios y recibe orientación espiritual a través de palabras de amor y esperanza basadas en la Biblia.",
     // Login e autenticação
     login: "Iniciar sesión",
     logout: "Cerrar sesión",
@@ -289,6 +295,7 @@ const translations = {
     addedToFavorites: "Añadido a favoritos",
     removedFromFavorites: "Eliminado de favoritos",
     chatWelcome: "¡Hola! ¿Cómo puedo ayudarte hoy? Estoy aquí para conversar y compartir palabras de amor, fe y esperanza basadas en las Escrituras.",
+    welcomeMessage: "Conversa con Dios y recibe orientación espiritual a través de palabras de amor y esperanza basadas en la Biblia.",
     // Versículo do dia
     todaysVerse: "Versículo del Día",
     verseLoadError: "No se pudo cargar el versículo del día",
