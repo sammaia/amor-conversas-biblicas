@@ -14,7 +14,7 @@ const BIBLE_VERSIONS: BibleVersions = {
   es: "592420522e16049f-01", // Reina Valera 1909
 };
 
-// Esta chave deve ser substituída pela sua chave de API
+// Chave de API que você forneceu
 const API_KEY = "62f59770e58ad92c1e32269ea76f695e";
 
 export interface BibleVerse {
