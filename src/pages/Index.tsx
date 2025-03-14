@@ -36,10 +36,10 @@ const Index = () => {
               transition={{ duration: 0.7 }}
             >
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-semibold text-sky-700 mb-4">
-                Deus é Amor
+                LanguageContext.appName
               </h1>
               <p className="text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto px-4">
-                Sua jornada de fé e conexão espiritual em um só lugar
+                LanguageContext.welcomeMessage
               </p>
             </motion.div>
             
