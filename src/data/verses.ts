@@ -1,5 +1,5 @@
 
-interface Verse {
+export interface Verse {
   reference: {
     pt: string;
     en: string;
@@ -139,6 +139,7 @@ export const verses: Verse[] = [
   }
 ];
 
+// Função legada mantida para compatibilidade
 export const getDailyVerse = (): Verse => {
   // Get a verse based on the day of the year to ensure the same verse is shown all day
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);

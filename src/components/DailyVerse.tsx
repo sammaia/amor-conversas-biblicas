@@ -1,13 +1,60 @@
 
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { getDailyVerse } from "@/data/verses";
+import { getDailyVerse, BibleVerse } from "@/services/bibleApi";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Loader2 } from "lucide-react";
 
 const DailyVerse = () => {
   const { language, t } = useLanguage();
-  const verse = getDailyVerse();
+  const [verse, setVerse] = useState<BibleVerse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const fetchVerse = async () => {
+      try {
+        setLoading(true);
+        const dailyVerse = await getDailyVerse();
+        setVerse(dailyVerse);
+        setError(null);
+      } catch (err) {
+        setError(t("verseLoadError"));
+        console.error("Erro ao carregar versículo do dia:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchVerse();
+  }, [t]);
+  
+  if (loading) {
+    return (
+      <div className="w-full max-w-2xl mx-auto my-6 flex justify-center items-center py-12">
+        <Loader2 className="w-8 h-8 text-sky-500 animate-spin" />
+      </div>
+    );
+  }
+  
+  if (error || !verse) {
+    return (
+      <motion.div
+        className="w-full max-w-2xl mx-auto my-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.2 }}
+      >
+        <Card className="bg-white bg-opacity-90 backdrop-blur-md border border-sky-100 shadow-sm overflow-hidden">
+          <CardContent className="pt-6 pb-6">
+            <p className="text-center text-slate-600">{error || t("verseUnavailable")}</p>
+          </CardContent>
+        </Card>
+      </motion.div>
+    );
+  }
   
   return (
     <motion.div
