@@ -15,6 +15,12 @@ export type TranslationKey =
   | "delete"
   | "back"
   | "appDescription"
+  | "footerText"
+  | "account"
+  | "selectFolder"
+  | "newFolder"
+  | "reflectionTitle"
+  | "verseUnavailable"
   // Login e autenticação
   | "login"
   | "logout"
@@ -36,6 +42,17 @@ export type TranslationKey =
   | "passwordMismatch"
   | "invalidEmail"
   | "requiredField"
+  | "loginMessage"
+  | "registerMessage"
+  | "loggingIn"
+  | "registering"
+  | "dontHaveAccount"
+  | "alreadyHaveAccount"
+  | "backToHome"
+  | "name"
+  | "namePlaceholder"
+  | "passwordsDoNotMatch"
+  | "passwordTooShort"
   // Navegação
   | "home"
   | "explore"
@@ -58,6 +75,7 @@ export type TranslationKey =
   | "aiError"
   | "noMessages"
   | "favorites"
+  | "favorite"
   | "folders"
   | "createFolder"
   | "folderName"
@@ -77,6 +95,13 @@ export type TranslationKey =
   | "removedFromFavorites"
   | "chatWelcome"
   | "welcomeMessage"
+  | "conversationHistory"
+  | "manageConversations"
+  | "noSearchResults"
+  | "noConversations"
+  | "conversation"
+  | "noFavorites"
+  | "noFolders"
   // Versículo do dia
   | "todaysVerse"
   | "verseLoadError"
@@ -105,6 +130,12 @@ const translationsPT = {
     delete: "Excluir",
     back: "Voltar",
     appDescription: "Converse com Deus e receba orientação espiritual através de palavras de amor e esperança baseadas na Bíblia.",
+    footerText: "Deus é Amor - Toda Glória a Deus",
+    account: "Sua Conta",
+    selectFolder: "Selecione uma pasta para adicionar esta mensagem",
+    newFolder: "Nova Pasta",
+    reflectionTitle: "Reflexão",
+    verseUnavailable: "Versículo indisponível no momento",
     // Login e autenticação
     login: "Entrar",
     logout: "Sair",
@@ -126,6 +157,17 @@ const translationsPT = {
     passwordMismatch: "As senhas não coincidem",
     invalidEmail: "E-mail inválido",
     requiredField: "Campo obrigatório",
+    loginMessage: "Entre em sua conta para continuar sua jornada espiritual",
+    registerMessage: "Crie sua conta para começar sua jornada espiritual",
+    loggingIn: "Entrando...",
+    registering: "Cadastrando...",
+    dontHaveAccount: "Ainda não tem uma conta?",
+    alreadyHaveAccount: "Já tem uma conta?",
+    backToHome: "Voltar para a página inicial",
+    name: "Nome",
+    namePlaceholder: "Seu nome completo",
+    passwordsDoNotMatch: "As senhas não coincidem",
+    passwordTooShort: "A senha deve ter pelo menos 6 caracteres",
     // Navegação
     home: "Início",
     explore: "Explorar",
@@ -148,6 +190,7 @@ const translationsPT = {
     aiError: "Desculpe, não consegui processar sua mensagem neste momento. Por favor, tente novamente.",
     noMessages: "Nenhuma mensagem para mostrar",
     favorites: "Favoritos",
+    favorite: "Favorito",
     folders: "Pastas",
     createFolder: "Criar pasta",
     folderName: "Nome da pasta",
@@ -167,6 +210,13 @@ const translationsPT = {
     removedFromFavorites: "Removido dos favoritos",
     chatWelcome: "Olá! Como posso te ajudar hoje? Estou aqui para conversar e compartilhar palavras de amor, fé e esperança baseadas nas Escrituras.",
     welcomeMessage: "Converse com Deus e receba orientação espiritual através de palavras de amor e esperança baseadas na Bíblia.",
+    conversationHistory: "Histórico de Conversas",
+    manageConversations: "Gerencie suas conversas aqui",
+    noSearchResults: "Nenhum resultado encontrado para sua busca",
+    noConversations: "Você ainda não tem nenhuma conversa",
+    conversation: "Conversa",
+    noFavorites: "Você ainda não tem mensagens favoritas",
+    noFolders: "Você ainda não tem nenhuma pasta",
     // Versículo do dia
     todaysVerse: "Versículo do Dia",
     verseLoadError: "Não foi possível carregar o versículo do dia",
@@ -189,6 +239,12 @@ const translationsEN = {
     delete: "Delete",
     back: "Back",
     appDescription: "Chat with God and receive spiritual guidance through words of love and hope based on the Bible.",
+    footerText: "God is Love - All Glory to God",
+    account: "Your Account",
+    selectFolder: "Select a folder to add this message",
+    newFolder: "New Folder",
+    reflectionTitle: "Reflection",
+    verseUnavailable: "Verse currently unavailable",
     // Login e autenticação
     login: "Login",
     logout: "Logout",
@@ -210,6 +266,17 @@ const translationsEN = {
     passwordMismatch: "Passwords do not match",
     invalidEmail: "Invalid email",
     requiredField: "Required field",
+    loginMessage: "Sign in to your account to continue your spiritual journey",
+    registerMessage: "Create your account to start your spiritual journey",
+    loggingIn: "Signing in...",
+    registering: "Registering...",
+    dontHaveAccount: "Don't have an account?",
+    alreadyHaveAccount: "Already have an account?",
+    backToHome: "Back to home page",
+    name: "Name",
+    namePlaceholder: "Your full name",
+    passwordsDoNotMatch: "Passwords do not match",
+    passwordTooShort: "Password must be at least 6 characters",
     // Navegação
     home: "Home",
     explore: "Explore",
@@ -232,6 +299,7 @@ const translationsEN = {
     aiError: "Sorry, I could not process your message at this time. Please try again.",
     noMessages: "No messages to display",
     favorites: "Favorites",
+    favorite: "Favorite",
     folders: "Folders",
     createFolder: "Create folder",
     folderName: "Folder name",
@@ -251,6 +319,13 @@ const translationsEN = {
     removedFromFavorites: "Removed from favorites",
     chatWelcome: "Hello! How can I help you today? I'm here to chat and share words of love, faith, and hope based on the Scriptures.",
     welcomeMessage: "Chat with God and receive spiritual guidance through words of love and hope based on the Bible.",
+    conversationHistory: "Conversation History",
+    manageConversations: "Manage your conversations here",
+    noSearchResults: "No results found for your search",
+    noConversations: "You don't have any conversations yet",
+    conversation: "Conversation",
+    noFavorites: "You don't have any favorite messages yet",
+    noFolders: "You don't have any folders yet",
     // Versículo do dia
     todaysVerse: "Verse of the Day",
     verseLoadError: "Could not load today's verse",
@@ -273,6 +348,12 @@ const translationsES = {
     delete: "Eliminar",
     back: "Volver",
     appDescription: "Conversa con Dios y recibe orientación espiritual a través de palabras de amor y esperanza basadas en la Biblia.",
+    footerText: "Dios es Amor - Toda la Gloria a Dios",
+    account: "Tu Cuenta",
+    selectFolder: "Selecciona una carpeta para añadir este mensaje",
+    newFolder: "Nueva Carpeta",
+    reflectionTitle: "Reflexión",
+    verseUnavailable: "Versículo no disponible en este momento",
     // Login e autenticação
     login: "Iniciar sesión",
     logout: "Cerrar sesión",
@@ -294,6 +375,17 @@ const translationsES = {
     passwordMismatch: "Las contraseñas no coinciden",
     invalidEmail: "Correo electrónico inválido",
     requiredField: "Campo obligatorio",
+    loginMessage: "Inicia sesión en tu cuenta para continuar tu viaje espiritual",
+    registerMessage: "Crea tu cuenta para comenzar tu viaje espiritual",
+    loggingIn: "Iniciando sesión...",
+    registering: "Registrando...",
+    dontHaveAccount: "¿No tienes una cuenta?",
+    alreadyHaveAccount: "¿Ya tienes una cuenta?",
+    backToHome: "Volver a la página de inicio",
+    name: "Nombre",
+    namePlaceholder: "Tu nombre completo",
+    passwordsDoNotMatch: "Las contraseñas no coinciden",
+    passwordTooShort: "La contraseña debe tener al menos 6 caracteres",
     // Navegação
     home: "Inicio",
     explore: "Explorar",
@@ -316,6 +408,7 @@ const translationsES = {
     aiError: "Lo siento, no pude procesar tu mensaje en este momento. Por favor, inténtalo de nuevo.",
     noMessages: "No hay mensajes para mostrar",
     favorites: "Favoritos",
+    favorite: "Favorito",
     folders: "Carpetas",
     createFolder: "Crear carpeta",
     folderName: "Nombre de la carpeta",
@@ -335,6 +428,13 @@ const translationsES = {
     removedFromFavorites: "Eliminado de favoritos",
     chatWelcome: "¡Hola! ¿Cómo puedo ayudarte hoy? Estoy aquí para conversar y compartir palabras de amor, fe y esperanza basadas en las Escrituras.",
     welcomeMessage: "Conversa con Dios y recibe orientación espiritual a través de palabras de amor y esperanza basadas en la Biblia.",
+    conversationHistory: "Historial de Conversaciones",
+    manageConversations: "Administra tus conversaciones aquí",
+    noSearchResults: "No se encontraron resultados para tu búsqueda",
+    noConversations: "Aún no tienes conversaciones",
+    conversation: "Conversación",
+    noFavorites: "Aún no tienes mensajes favoritos",
+    noFolders: "Aún no tienes carpetas",
     // Versículo do dia
     todaysVerse: "Versículo del Día",
     verseLoadError: "No se pudo cargar el versículo del día",
