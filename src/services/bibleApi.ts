@@ -118,7 +118,7 @@ const fetchVerseByReference = async (
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "api-key": API_KEY,
+        "api-key": "62f59770e58ad92c1e32269ea76f695e",
         "Content-Type": "application/json",
       },
     });
