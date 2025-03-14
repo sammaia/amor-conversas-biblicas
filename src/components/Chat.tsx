@@ -1,10 +1,9 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useChat } from "@/context/ChatContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Star, StarOff, FolderPlus } from "lucide-react";
+import { Send, Star, StarOff, FolderPlus, Key } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -13,9 +12,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Message } from "@/types/chat";
 import FolderSelector from "@/components/FolderSelector";
-import { sendMessageToOpenAI } from "@/services/openAIService";
+import { sendMessageToOpenAI, isApiKeyConfigured, saveApiKey } from "@/services/openAIService";
+import { useToast } from "@/hooks/use-toast";
 
 const Chat = () => {
   const { t, language } = useLanguage();
@@ -28,7 +38,10 @@ const Chat = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showFolderSelector, setShowFolderSelector] = useState(false);
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
+  const [apiKey, setApiKey] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -38,6 +51,12 @@ const Chat = () => {
     scrollToBottom();
   }, [currentConversation?.messages]);
 
+  useEffect(() => {
+    if (!isApiKeyConfigured()) {
+      setShowApiKeyDialog(true);
+    }
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
   };
@@ -46,13 +65,17 @@ const Chat = () => {
     e.preventDefault();
     if (!input.trim() || isSubmitting) return;
 
+    if (!isApiKeyConfigured()) {
+      setShowApiKeyDialog(true);
+      return;
+    }
+
     const userMessage = input.trim();
     addMessage(userMessage, "user");
     setInput("");
     setIsSubmitting(true);
 
     try {
-      // Enviar a mensagem para a OpenAI e receber a resposta
       const botResponse = await sendMessageToOpenAI(userMessage, language);
       addMessage(botResponse, "assistant");
     } catch (error) {
@@ -79,6 +102,27 @@ const Chat = () => {
     setShowFolderSelector(true);
   };
 
+  const handleSaveApiKey = () => {
+    if (apiKey.trim()) {
+      saveApiKey(apiKey.trim());
+      setShowApiKeyDialog(false);
+      toast({
+        title: "Chave API salva com sucesso",
+        description: "Sua chave foi salva localmente no seu navegador.",
+      });
+    } else {
+      toast({
+        title: "Erro ao salvar chave API",
+        description: "Por favor, insira uma chave API válida.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleConfigureApiKey = () => {
+    setShowApiKeyDialog(true);
+  };
+
   const messages = currentConversation?.messages || [];
 
   return (
@@ -89,10 +133,19 @@ const Chat = () => {
       transition={{ duration: 0.7, delay: 0.3 }}
     >
       <Card className="bg-white bg-opacity-95 backdrop-blur-md border border-sky-100 shadow-sm overflow-hidden">
-        <CardHeader className="pb-2 pt-6 bg-gradient-to-r from-sky-50 to-white">
+        <CardHeader className="pb-2 pt-6 bg-gradient-to-r from-sky-50 to-white flex flex-row items-center justify-between">
           <CardTitle className="text-xl text-center text-sky-700 font-serif">
             {t("chat")}
           </CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleConfigureApiKey}
+            className="text-sky-600 border-sky-200 hover:bg-sky-50"
+          >
+            <Key className="h-4 w-4 mr-1" />
+            API Key
+          </Button>
         </CardHeader>
         <CardContent className="p-0">
           <div className="h-[400px] overflow-y-auto p-4 bg-white bg-opacity-70 scroll-smooth">
@@ -193,6 +246,46 @@ const Chat = () => {
           }}
         />
       )}
+
+      <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Configure sua chave API OpenAI</DialogTitle>
+            <DialogDescription>
+              Para usar o chat, é necessário fornecer sua própria chave API da OpenAI. 
+              Essa chave será armazenada apenas no seu navegador e não será compartilhada.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="api-key">OpenAI API Key</Label>
+              <Input
+                id="api-key"
+                type="password"
+                placeholder="sk-..."
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
+              <p className="text-xs text-slate-500">
+                Você pode obter sua chave API em: 
+                <a 
+                  href="https://platform.openai.com/api-keys" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sky-600 hover:underline ml-1"
+                >
+                  platform.openai.com/api-keys
+                </a>
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" onClick={handleSaveApiKey}>
+              Salvar API Key
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };
