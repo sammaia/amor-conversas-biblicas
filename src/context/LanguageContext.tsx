@@ -89,8 +89,8 @@ interface Translations {
 
 const translations: Record<SupportedLanguage, Translations> = {
   pt: {
-    appName: "Deus é Amor",
-    welcomeMessage: "Bem-vindo ao Deus é Amor",
+    appName: "Conversa com Deus",
+    welcomeMessage: "Bem-vindo ao Conversa com Deus",
     sendMessage: "Enviar mensagem",
     typeMessage: "Digite sua mensagem...",
     search: "Buscar...",
@@ -167,8 +167,8 @@ const translations: Record<SupportedLanguage, Translations> = {
     reflectionTitle: "Reflexão do Dia",
   },
   en: {
-    appName: "God is Love",
-    welcomeMessage: "Welcome to God is Love",
+    appName: "Talk to God",
+    welcomeMessage: "Welcome to Talk to God",
     sendMessage: "Send message",
     typeMessage: "Type your message...",
     search: "Search...",
@@ -245,8 +245,8 @@ const translations: Record<SupportedLanguage, Translations> = {
     reflectionTitle: "Daily Reflection",
   },
   es: {
-    appName: "Dios es Amor",
-    welcomeMessage: "Bienvenido a Dios es Amor",
+    appName: "Hablar con Dios",
+    welcomeMessage: "Bienvenido a Hablar com Dios",
     sendMessage: "Enviar mensaje",
     typeMessage: "Escribe tu mensaje...",
     search: "Buscar...",
