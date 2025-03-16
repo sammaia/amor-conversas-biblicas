@@ -30,6 +30,7 @@ import {
   SearchResult
 } from '@/services/bibleBrowseService';
 import { useLanguage } from '@/context/LanguageContext';
+import Header from '@/components/Header';
 
 const BibleBrowser = () => {
   const { t } = useTranslation();
@@ -250,45 +251,49 @@ const BibleBrowser = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h2 className="text-3xl font-bold text-center mb-8 text-primary">{t('bibleBrowser')}</h2>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-sky-50 to-white">
+      <Header />
+      
+      <div className="container mx-auto py-8 px-4">
+        <h2 className="text-3xl font-bold text-center mb-8 text-primary">{t('bibleBrowser')}</h2>
 
-      <div className="flex flex-col space-y-6 mb-8">
-        <div className="flex w-full max-w-lg mx-auto">
-          <Input
-            type="text"
-            placeholder={t('searchBible')}
-            value={searchTerm}
-            onChange={handleSearchChange}
-            onKeyPress={handleKeyPress}
-            className="mr-2"
-          />
-          <Button 
-            onClick={handleSearchClick} 
-            disabled={isSearching || searchTerm.length < 3}
-          >
-            <Search className="mr-2 h-4 w-4" />
-            {t('search')}
-          </Button>
+        <div className="flex flex-col space-y-6 mb-8">
+          <div className="flex w-full max-w-lg mx-auto">
+            <Input
+              type="text"
+              placeholder={t('searchBible')}
+              value={searchTerm}
+              onChange={handleSearchChange}
+              onKeyPress={handleKeyPress}
+              className="mr-2"
+            />
+            <Button 
+              onClick={handleSearchClick} 
+              disabled={isSearching || searchTerm.length < 3}
+            >
+              <Search className="mr-2 h-4 w-4" />
+              {t('search')}
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <Tabs defaultValue="browse" className="w-full">
-        <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
-          <TabsTrigger value="browse">{t('browse')}</TabsTrigger>
-          <TabsTrigger value="search">{t('searchResults')}</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="browse" className="mt-6">
-          {renderBibleNavigation()}
-        </TabsContent>
-        
-        <TabsContent value="search" className="mt-6">
-          <ScrollArea className="h-[60vh]">
-            {renderSearchResults()}
-          </ScrollArea>
-        </TabsContent>
-      </Tabs>
+        <Tabs defaultValue="browse" className="w-full">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+            <TabsTrigger value="browse">{t('browse')}</TabsTrigger>
+            <TabsTrigger value="search">{t('searchResults')}</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="browse" className="mt-6">
+            {renderBibleNavigation()}
+          </TabsContent>
+          
+          <TabsContent value="search" className="mt-6">
+            <ScrollArea className="h-[60vh]">
+              {renderSearchResults()}
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 };
