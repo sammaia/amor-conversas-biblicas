@@ -3,17 +3,17 @@ export interface Verse {
   reference: {
     pt: string;
     en: string;
-    es: string;
+    es?: string; // Mantendo como opcional para compatibilidade com dados existentes
   };
   text: {
     pt: string;
     en: string;
-    es: string;
+    es?: string; // Mantendo como opcional para compatibilidade com dados existentes
   };
   context?: {
     pt: string;
     en: string;
-    es: string;
+    es?: string; // Mantendo como opcional para compatibilidade com dados existentes
   };
 }
 

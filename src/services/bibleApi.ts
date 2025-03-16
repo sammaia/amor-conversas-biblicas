@@ -1,3 +1,4 @@
+
 import { verses as localVerses } from "@/data/verses";
 import { getConfig, saveConfig, ConfigKeys } from "./configService";
 
@@ -74,13 +75,12 @@ export const fetchRandomVerse = async (): Promise<BibleVerse | null> => {
     const reference = `${randomBook.name}.${randomChapter}.${randomVerse}`;
     
     // Busca o versículo em cada idioma
-    const [ptVerse, enVerse, esVerse] = await Promise.all([
+    const [ptVerse, enVerse] = await Promise.all([
       fetchVerseByReference(reference, 'pt'),
-      fetchVerseByReference(reference, 'en'),
-      fetchVerseByReference(reference, 'es')
+      fetchVerseByReference(reference, 'en')
     ]);
     
-    if (!ptVerse || !enVerse || !esVerse) {
+    if (!ptVerse || !enVerse) {
       throw new Error("Não foi possível obter o versículo em todos os idiomas");
     }
     
@@ -88,18 +88,15 @@ export const fetchRandomVerse = async (): Promise<BibleVerse | null> => {
     return {
       reference: {
         pt: ptVerse.reference,
-        en: enVerse.reference,
-        es: esVerse.reference
+        en: enVerse.reference
       },
       text: {
         pt: ptVerse.text,
-        en: enVerse.text,
-        es: esVerse.text
+        en: enVerse.text
       },
       context: {
         pt: generateVerseContext(ptVerse, 'pt'),
-        en: generateVerseContext(enVerse, 'en'),
-        es: generateVerseContext(esVerse, 'es')
+        en: generateVerseContext(enVerse, 'en')
       }
     };
   } catch (error) {
@@ -169,13 +166,6 @@ const generateVerseContext = (verse: VerseResponse, language: string): string =>
       "In times of difficulty, this verse offers comfort and hope, showing that God's plan is perfect.",
       "The message of this verse encourages us to trust God completely, even when we don't understand His ways.",
       "Through these words, we are reminded of the importance of faith, love, and hope in our Christian walk."
-    ],
-    es: [
-      "Este versículo nos recuerda el amor incondicional de Dios y cómo Él siempre está presente en nuestro camino diario.",
-      "Reflexiona sobre estas palabras de sabiduría durante tu día, permitiendo que guíen tus decisiones y actitudes.",
-      "En momentos de dificultad, este versículo ofrece consuelo y esperanza, mostrando que el plan de Dios es perfecto.",
-      "El mensaje de este versículo nos anima a confiar en Dios completamente, incluso cuando no entendemos Sus caminos.",
-      "A través de estas palabras, recordamos la importancia de la fe, el amor y la esperanza en nuestro caminar cristiano."
     ]
   };
   
@@ -214,5 +204,21 @@ const getFallbackDailyVerse = (): BibleVerse => {
     (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
   );
   
-  return localVerses[dayOfYear % localVerses.length];
+  const verse = localVerses[dayOfYear % localVerses.length];
+  
+  // Retorna apenas com pt e en, removendo es
+  return {
+    reference: {
+      pt: verse.reference.pt,
+      en: verse.reference.en
+    },
+    text: {
+      pt: verse.text.pt,
+      en: verse.text.en
+    },
+    context: verse.context ? {
+      pt: verse.context.pt,
+      en: verse.context.en
+    } : undefined
+  };
 };
