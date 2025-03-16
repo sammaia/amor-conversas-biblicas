@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
-import { useTranslation } from 'react-i18next';
-import i18n from '../i18n';
+
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 
 // Tipo para as chaves de tradução disponíveis
 export type TranslationKey = 
@@ -41,11 +40,39 @@ export type TranslationKey =
   | "registering"
   | "alreadyHaveAccount"
   | "apiKeyRequired"
-  | "apiKeyMissing"; // Novas chaves para mensagens relacionadas à API
+  | "apiKeyMissing"
+  | "appName"
+  | "history"
+  | "login"
+  | "email"
+  | "password"
+  | "forgotPassword"
+  | "register"
+  | "confirmPassword"
+  | "profile"
+  | "logout"
+  | "newConversation"
+  | "chatWelcome"
+  | "addedToFavorites"
+  | "removedFromFavorites"
+  | "folderCreated"
+  | "folderRenamed"
+  | "folderDeleted"
+  | "messageAlreadyInFolder"
+  | "addedToFolder"
+  | "removedFromFolder"
+  | "search"
+  | "favorites"
+  | "folders"
+  | "folderName"
+  | "save"
+  | "cancel"
+  | "back"
+  | "emptyFolder";
 
 // Tipo para as traduções
 interface Translations {
-  [key in TranslationKey]: {
+  [key: string]: {
     pt: string;
     en: string;
     es: string;
@@ -243,6 +270,147 @@ const translations: Translations = {
     pt: "Chave API não encontrada. Configure nas configurações.",
     en: "API key not found. Configure in settings.",
     es: "Clave API no encontrada. Configure en ajustes."
+  },
+  // New translations for missing keys
+  appName: {
+    pt: "Deus é Amor",
+    en: "God is Love",
+    es: "Dios es Amor"
+  },
+  history: {
+    pt: "Histórico",
+    en: "History",
+    es: "Historial"
+  },
+  login: {
+    pt: "Entrar",
+    en: "Login",
+    es: "Iniciar sesión"
+  },
+  email: {
+    pt: "E-mail",
+    en: "Email",
+    es: "Correo electrónico"
+  },
+  password: {
+    pt: "Senha",
+    en: "Password",
+    es: "Contraseña"
+  },
+  forgotPassword: {
+    pt: "Esqueceu a senha?",
+    en: "Forgot password?",
+    es: "¿Olvidó su contraseña?"
+  },
+  register: {
+    pt: "Registrar",
+    en: "Register",
+    es: "Registrarse"
+  },
+  confirmPassword: {
+    pt: "Confirmar Senha",
+    en: "Confirm Password",
+    es: "Confirmar Contraseña"
+  },
+  profile: {
+    pt: "Perfil",
+    en: "Profile",
+    es: "Perfil"
+  },
+  logout: {
+    pt: "Sair",
+    en: "Logout",
+    es: "Cerrar sesión"
+  },
+  newConversation: {
+    pt: "Nova Conversa",
+    en: "New Conversation",
+    es: "Nueva Conversación"
+  },
+  chatWelcome: {
+    pt: "Olá! Como posso ajudá-lo hoje com base nos ensinamentos da Bíblia?",
+    en: "Hello! How can I help you today based on Bible teachings?",
+    es: "¡Hola! ¿Cómo puedo ayudarte hoy basándome en las enseñanzas de la Biblia?"
+  },
+  addedToFavorites: {
+    pt: "Adicionado aos favoritos",
+    en: "Added to favorites",
+    es: "Añadido a favoritos"
+  },
+  removedFromFavorites: {
+    pt: "Removido dos favoritos",
+    en: "Removed from favorites",
+    es: "Eliminado de favoritos"
+  },
+  folderCreated: {
+    pt: "Pasta criada com sucesso",
+    en: "Folder created successfully",
+    es: "Carpeta creada con éxito"
+  },
+  folderRenamed: {
+    pt: "Pasta renomeada com sucesso",
+    en: "Folder renamed successfully",
+    es: "Carpeta renombrada con éxito"
+  },
+  folderDeleted: {
+    pt: "Pasta excluída com sucesso",
+    en: "Folder deleted successfully",
+    es: "Carpeta eliminada con éxito"
+  },
+  messageAlreadyInFolder: {
+    pt: "Mensagem já está nesta pasta",
+    en: "Message is already in this folder",
+    es: "El mensaje ya está en esta carpeta"
+  },
+  addedToFolder: {
+    pt: "Adicionado à pasta",
+    en: "Added to folder",
+    es: "Añadido a la carpeta"
+  },
+  removedFromFolder: {
+    pt: "Removido da pasta",
+    en: "Removed from folder",
+    es: "Eliminado de la carpeta"
+  },
+  search: {
+    pt: "Pesquisar",
+    en: "Search",
+    es: "Buscar"
+  },
+  favorites: {
+    pt: "Favoritos",
+    en: "Favorites",
+    es: "Favoritos"
+  },
+  folders: {
+    pt: "Pastas",
+    en: "Folders",
+    es: "Carpetas"
+  },
+  folderName: {
+    pt: "Nome da pasta",
+    en: "Folder name",
+    es: "Nombre de la carpeta"
+  },
+  save: {
+    pt: "Salvar",
+    en: "Save",
+    es: "Guardar"
+  },
+  cancel: {
+    pt: "Cancelar",
+    en: "Cancel",
+    es: "Cancelar"
+  },
+  back: {
+    pt: "Voltar",
+    en: "Back",
+    es: "Volver"
+  },
+  emptyFolder: {
+    pt: "Pasta vazia",
+    en: "Empty folder",
+    es: "Carpeta vacía"
   }
 };
 
@@ -255,19 +423,19 @@ interface LanguageContextProps {
 const LanguageContext = createContext<LanguageContextProps | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState(i18n.language);
+  const [language, setLanguage] = useState("pt"); // Default to Portuguese
 
   const changeLanguage = useCallback((lang: string) => {
-    i18n.changeLanguage(lang);
     setLanguage(lang);
   }, []);
 
-  useEffect(() => {
-    i18n.changeLanguage(language);
-  }, [language]);
-
   const t = (key: TranslationKey): string => {
-    return translations[key][language as keyof typeof translations[key]] || `Missing translation for ${key} in ${language}`;
+    const translation = translations[key];
+    if (!translation) {
+      return `Missing translation for ${key}`;
+    }
+    
+    return translation[language as "pt" | "en" | "es"] || translation["en"] || `Missing translation for ${key} in ${language}`;
   };
 
   return (
