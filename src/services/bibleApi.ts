@@ -1,39 +1,46 @@
-
 import { verses as localVerses } from "@/data/verses";
+import { getConfig, saveConfig, ConfigKeys } from "./configService";
 
 interface BibleVersions {
   pt: string;
   en: string;
-  es: string;
 }
 
 // IDs das versões da Bíblia na API para cada idioma
 const BIBLE_VERSIONS: BibleVersions = {
   pt: "b730fb6bd36cf26a-01", // Almeida Revista e Atualizada
   en: "de4e12af7f28f599-01", // King James Version (KJV)
-  es: "592420522e16049f-01", // Reina Valera 1909
 };
 
-// Chave de API que você forneceu
-const API_KEY = "62f59770e58ad92c1e32269ea76f695e";
+// Obtém a chave de API da Bíblia do serviço de configuração
+const getBibleApiKey = (): string => {
+  const apiKey = getConfig(ConfigKeys.BIBLE_API_KEY);
+  // Use uma chave padrão apenas para fallback se necessário
+  return apiKey || "62f59770e58ad92c1e32269ea76f695e";
+};
 
 export interface BibleVerse {
   reference: {
     pt: string;
     en: string;
-    es: string;
   };
   text: {
     pt: string;
     en: string;
-    es: string;
   };
   context?: {
     pt: string;
     en: string;
-    es: string;
   };
 }
+
+/**
+ * Salva a chave da API da Bíblia de forma segura
+ * @param key Chave da API
+ */
+export const saveBibleApiKey = (key: string): void => {
+  saveConfig(ConfigKeys.BIBLE_API_KEY, key);
+};
 
 /**
  * Busca um versículo aleatório da API da Bíblia
@@ -120,7 +127,7 @@ const fetchVerseByReference = async (
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        "api-key": API_KEY,
+        "api-key": getBibleApiKey(),
         "Content-Type": "application/json",
       },
     });

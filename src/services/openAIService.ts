@@ -1,9 +1,9 @@
-
 import OpenAI from "openai";
+import { getConfig, saveConfig, hasConfig, ConfigKeys } from "./configService";
 
-// Função para obter a chave da API do localStorage
+// Função para obter a chave da API através do serviço de configuração
 const getApiKey = (): string | null => {
-  return localStorage.getItem("openai_api_key");
+  return getConfig(ConfigKeys.OPENAI_API_KEY);
 };
 
 // Inicializa o cliente da OpenAI com a chave da API
@@ -43,15 +43,15 @@ Você deve manter o mesmo idioma que o usuário utiliza (português, inglês ou 
  * @returns boolean indicando se a chave existe
  */
 export const isApiKeyConfigured = (): boolean => {
-  return !!getApiKey();
+  return hasConfig(ConfigKeys.OPENAI_API_KEY);
 };
 
 /**
- * Salva a chave da API no localStorage
+ * Salva a chave da API de forma segura
  * @param key Chave da API da OpenAI
  */
 export const saveApiKey = (key: string): void => {
-  localStorage.setItem("openai_api_key", key);
+  saveConfig(ConfigKeys.OPENAI_API_KEY, key);
 };
 
 /**

@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
+import { initializeDefaultApiKeys } from "./services/configService";
 
 // Initialize language before rendering
 i18n.init();
@@ -26,7 +27,7 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Use effect to detect browser language changes
+  // Use effect to detect browser language changes and initialize configs
   useEffect(() => {
     const handleLanguageChange = () => {
       // This is just a placeholder in case we want to react to system language changes
@@ -34,6 +35,9 @@ const App = () => {
     };
 
     handleLanguageChange();
+    
+    // Inicializa as chaves de API padrão (apenas para desenvolvimento)
+    initializeDefaultApiKeys();
   }, []);
 
   return (
