@@ -4,9 +4,11 @@ import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 const NotFound = () => {
   const location = useLocation();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     console.error(
@@ -24,7 +26,7 @@ const NotFound = () => {
         transition={{ duration: 0.6 }}
       >
         <motion.h1 
-          className="text-7xl font-bold mb-2 text-sky-700 font-serif"
+          className="text-8xl font-bold mb-2 text-sky-700 font-serif"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
@@ -43,17 +45,17 @@ const NotFound = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          Página não encontrada
+          {language === "pt" ? "Página não encontrada" : "Page not found"}
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.6 }}
         >
-          <Button asChild className="bg-sky-500 hover:bg-sky-600 transition-colors duration-300">
+          <Button asChild className="bg-sky-500 hover:bg-sky-600 transition-colors duration-300 shadow-md hover:shadow-lg">
             <Link to="/" className="inline-flex items-center">
               <Home className="mr-2 h-4 w-4" />
-              Voltar para o Início
+              {t("backToHome")}
             </Link>
           </Button>
         </motion.div>

@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import i18n from '../i18n';
 
 // Tipo para as chaves de tradução disponíveis
 export type TranslationKey = 
@@ -71,346 +72,281 @@ export type TranslationKey =
   | "emptyFolder";
 
 // Tipo para as traduções
+type TranslationLanguages = {
+  pt: string;
+  en: string;
+};
+
+// Interface para o objeto de traduções
 interface Translations {
-  [key: string]: {
-    pt: string;
-    en: string;
-    es: string;
-  };
+  [key: string]: TranslationLanguages;
 }
 
 // Traduções disponíveis
 const translations: Translations = {
   welcomeMessage: {
     pt: "Bem-vindo(a) ao Deus é Amor!",
-    en: "Welcome to God is Love!",
-    es: "¡Bienvenido(a) a Dios es Amor!"
+    en: "Welcome to God is Love!"
   },
   appDescription: {
     pt: "Um espaço de fé e esperança para o seu dia a dia.",
-    en: "A space of faith and hope for your daily life.",
-    es: "Un espacio de fe y esperanza para tu vida diaria."
+    en: "A space of faith and hope for your daily life."
   },
   startChat: {
     pt: "Começar Chat",
-    en: "Start Chat",
-    es: "Comenzar Chat"
+    en: "Start Chat"
   },
   readingPlan: {
     pt: "Plano de Leitura",
-    en: "Reading Plan",
-    es: "Plan de Lectura"
+    en: "Reading Plan"
   },
   chat: {
     pt: "Chat",
-    en: "Chat",
-    es: "Chat"
+    en: "Chat"
   },
   send: {
     pt: "Enviar",
-    en: "Send",
-    es: "Enviar"
+    en: "Send"
   },
   chatPlaceholder: {
     pt: "Escreva sua mensagem...",
-    en: "Write your message...",
-    es: "Escribe tu mensaje..."
+    en: "Write your message..."
   },
   todaysVerse: {
     pt: "Versículo do Dia",
-    en: "Today's Verse",
-    es: "Versículo del Día"
+    en: "Today's Verse"
   },
   verseLoadError: {
     pt: "Erro ao carregar o versículo do dia.",
-    en: "Error loading the verse of the day.",
-    es: "Error al cargar el versículo del día."
+    en: "Error loading the verse of the day."
   },
   verseUnavailable: {
     pt: "Versículo do dia não disponível no momento.",
-    en: "Verse of the day not available at the moment.",
-    es: "Versículo del día no disponible en este momento."
+    en: "Verse of the day not available at the moment."
   },
   reflectionTitle: {
     pt: "Reflexão",
-    en: "Reflection",
-    es: "Reflexión"
+    en: "Reflection"
   },
   loginMessage: {
     pt: "Entre para continuar",
-    en: "Login to continue",
-    es: "Entra para continuar"
+    en: "Login to continue"
   },
   registerMessage: {
     pt: "Crie uma conta",
-    en: "Create an account",
-    es: "Crea una cuenta"
+    en: "Create an account"
   },
   aiError: {
     pt: "Houve um erro ao processar a mensagem. Por favor, tente novamente.",
-    en: "There was an error processing the message. Please try again.",
-    es: "Hubo un error al procesar el mensaje. Por favor, inténtelo de nuevo."
+    en: "There was an error processing the message. Please try again."
   },
   addToFolder: {
     pt: "Adicionar à Pasta",
-    en: "Add to Folder",
-    es: "Añadir a la Carpeta"
+    en: "Add to Folder"
   },
   noSearchResults: {
     pt: "Nenhum resultado encontrado.",
-    en: "No results found.",
-    es: "No se encontraron resultados."
+    en: "No results found."
   },
   noConversations: {
     pt: "Nenhuma conversa encontrada.",
-    en: "No conversations found.",
-    es: "No se encontraron conversaciones."
+    en: "No conversations found."
   },
   conversation: {
     pt: "Conversa",
-    en: "Conversation",
-    es: "Conversación"
+    en: "Conversation"
   },
   noFavorites: {
     pt: "Nenhum favorito adicionado.",
-    en: "No favorites added.",
-    es: "Ningún favorito añadido."
+    en: "No favorites added."
   },
   favorite: {
     pt: "Favorito",
-    en: "Favorite",
-    es: "Favorito"
+    en: "Favorite"
   },
   noFolders: {
     pt: "Nenhuma pasta criada.",
-    en: "No folders created.",
-    es: "Ninguna carpeta creada."
+    en: "No folders created."
   },
   conversationHistory: {
     pt: "Histórico de Conversas",
-    en: "Conversation History",
-    es: "Historial de Conversaciones"
+    en: "Conversation History"
   },
   manageConversations: {
     pt: "Gerenciar Conversas",
-    en: "Manage Conversations",
-    es: "Administrar Conversaciones"
+    en: "Manage Conversations"
   },
   selectFolder: {
     pt: "Selecionar Pasta",
-    en: "Select Folder",
-    es: "Seleccionar Carpeta"
+    en: "Select Folder"
   },
   newFolder: {
     pt: "Nova Pasta",
-    en: "New Folder",
-    es: "Nueva Carpeta"
+    en: "New Folder"
   },
   footerText: {
     pt: "Deus é Amor - Todos os direitos reservados.",
-    en: "God is Love - All rights reserved.",
-    es: "Dios es Amor - Todos los derechos reservados."
+    en: "God is Love - All rights reserved."
   },
   account: {
     pt: "Conta",
-    en: "Account",
-    es: "Cuenta"
+    en: "Account"
   },
   loggingIn: {
     pt: "Entrando...",
-    en: "Logging in...",
-    es: "Iniciando sesión..."
+    en: "Logging in..."
   },
   dontHaveAccount: {
     pt: "Não tem uma conta?",
-    en: "Don't have an account?",
-    es: "¿No tienes una cuenta?"
+    en: "Don't have an account?"
   },
   backToHome: {
     pt: "Voltar para o Início",
-    en: "Back to Home",
-    es: "Volver al Inicio"
+    en: "Back to Home"
   },
   passwordsDoNotMatch: {
     pt: "As senhas não coincidem.",
-    en: "Passwords do not match.",
-    es: "Las contraseñas no coinciden."
+    en: "Passwords do not match."
   },
   passwordTooShort: {
     pt: "A senha deve ter pelo menos 6 caracteres.",
-    en: "Password must be at least 6 characters.",
-    es: "La contraseña debe tener al menos 6 caracteres."
+    en: "Password must be at least 6 characters."
   },
   name: {
     pt: "Nome",
-    en: "Name",
-    es: "Nombre"
+    en: "Name"
   },
   namePlaceholder: {
     pt: "Seu nome",
-    en: "Your name",
-    es: "Tu nombre"
+    en: "Your name"
   },
   registering: {
     pt: "Registrando...",
-    en: "Registering...",
-    es: "Registrando..."
+    en: "Registering..."
   },
   alreadyHaveAccount: {
     pt: "Já tem uma conta?",
-    en: "Already have an account?",
-    es: "¿Ya tienes una cuenta?"
+    en: "Already have an account?"
   },
   apiKeyRequired: {
     pt: "Por favor, configure sua chave API da OpenAI para continuar a conversa.",
-    en: "Please configure your OpenAI API key to continue the conversation.",
-    es: "Por favor, configure su clave API de OpenAI para continuar la conversación."
+    en: "Please configure your OpenAI API key to continue the conversation."
   },
   apiKeyMissing: {
     pt: "Chave API não encontrada. Configure nas configurações.",
-    en: "API key not found. Configure in settings.",
-    es: "Clave API no encontrada. Configure en ajustes."
+    en: "API key not found. Configure in settings."
   },
-  // New translations for missing keys
   appName: {
     pt: "Deus é Amor",
-    en: "God is Love",
-    es: "Dios es Amor"
+    en: "God is Love"
   },
   history: {
     pt: "Histórico",
-    en: "History",
-    es: "Historial"
+    en: "History"
   },
   login: {
     pt: "Entrar",
-    en: "Login",
-    es: "Iniciar sesión"
+    en: "Login"
   },
   email: {
     pt: "E-mail",
-    en: "Email",
-    es: "Correo electrónico"
+    en: "Email"
   },
   password: {
     pt: "Senha",
-    en: "Password",
-    es: "Contraseña"
+    en: "Password"
   },
   forgotPassword: {
     pt: "Esqueceu a senha?",
-    en: "Forgot password?",
-    es: "¿Olvidó su contraseña?"
+    en: "Forgot password?"
   },
   register: {
     pt: "Registrar",
-    en: "Register",
-    es: "Registrarse"
+    en: "Register"
   },
   confirmPassword: {
     pt: "Confirmar Senha",
-    en: "Confirm Password",
-    es: "Confirmar Contraseña"
+    en: "Confirm Password"
   },
   profile: {
     pt: "Perfil",
-    en: "Profile",
-    es: "Perfil"
+    en: "Profile"
   },
   logout: {
     pt: "Sair",
-    en: "Logout",
-    es: "Cerrar sesión"
+    en: "Logout"
   },
   newConversation: {
     pt: "Nova Conversa",
-    en: "New Conversation",
-    es: "Nueva Conversación"
+    en: "New Conversation"
   },
   chatWelcome: {
     pt: "Olá! Como posso ajudá-lo hoje com base nos ensinamentos da Bíblia?",
-    en: "Hello! How can I help you today based on Bible teachings?",
-    es: "¡Hola! ¿Cómo puedo ayudarte hoy basándome en las enseñanzas de la Biblia?"
+    en: "Hello! How can I help you today based on Bible teachings?"
   },
   addedToFavorites: {
     pt: "Adicionado aos favoritos",
-    en: "Added to favorites",
-    es: "Añadido a favoritos"
+    en: "Added to favorites"
   },
   removedFromFavorites: {
     pt: "Removido dos favoritos",
-    en: "Removed from favorites",
-    es: "Eliminado de favoritos"
+    en: "Removed from favorites"
   },
   folderCreated: {
     pt: "Pasta criada com sucesso",
-    en: "Folder created successfully",
-    es: "Carpeta creada con éxito"
+    en: "Folder created successfully"
   },
   folderRenamed: {
     pt: "Pasta renomeada com sucesso",
-    en: "Folder renamed successfully",
-    es: "Carpeta renombrada con éxito"
+    en: "Folder renamed successfully"
   },
   folderDeleted: {
     pt: "Pasta excluída com sucesso",
-    en: "Folder deleted successfully",
-    es: "Carpeta eliminada con éxito"
+    en: "Folder deleted successfully"
   },
   messageAlreadyInFolder: {
     pt: "Mensagem já está nesta pasta",
-    en: "Message is already in this folder",
-    es: "El mensaje ya está en esta carpeta"
+    en: "Message is already in this folder"
   },
   addedToFolder: {
     pt: "Adicionado à pasta",
-    en: "Added to folder",
-    es: "Añadido a la carpeta"
+    en: "Added to folder"
   },
   removedFromFolder: {
     pt: "Removido da pasta",
-    en: "Removed from folder",
-    es: "Eliminado de la carpeta"
+    en: "Removed from folder"
   },
   search: {
     pt: "Pesquisar",
-    en: "Search",
-    es: "Buscar"
+    en: "Search"
   },
   favorites: {
     pt: "Favoritos",
-    en: "Favorites",
-    es: "Favoritos"
+    en: "Favorites"
   },
   folders: {
     pt: "Pastas",
-    en: "Folders",
-    es: "Carpetas"
+    en: "Folders"
   },
   folderName: {
     pt: "Nome da pasta",
-    en: "Folder name",
-    es: "Nombre de la carpeta"
+    en: "Folder name"
   },
   save: {
     pt: "Salvar",
-    en: "Save",
-    es: "Guardar"
+    en: "Save"
   },
   cancel: {
     pt: "Cancelar",
-    en: "Cancel",
-    es: "Cancelar"
+    en: "Cancel"
   },
   back: {
     pt: "Voltar",
-    en: "Back",
-    es: "Volver"
+    en: "Back"
   },
   emptyFolder: {
     pt: "Pasta vazia",
-    en: "Empty folder",
-    es: "Carpeta vacía"
+    en: "Empty folder"
   }
 };
 
@@ -423,19 +359,23 @@ interface LanguageContextProps {
 const LanguageContext = createContext<LanguageContextProps | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState("pt"); // Default to Portuguese
+  // Initialize language on mount
+  const [language, setLanguage] = useState(() => i18n.init());
 
   const changeLanguage = useCallback((lang: string) => {
+    i18n.changeLanguage(lang);
     setLanguage(lang);
   }, []);
 
+  // Function to get translation
   const t = (key: TranslationKey): string => {
     const translation = translations[key];
     if (!translation) {
-      return `Missing translation for ${key}`;
+      console.warn(`Missing translation for key: ${key}`);
+      return key;
     }
     
-    return translation[language as "pt" | "en" | "es"] || translation["en"] || `Missing translation for ${key} in ${language}`;
+    return translation[language as keyof TranslationLanguages] || translation["en"] || key;
   };
 
   return (
