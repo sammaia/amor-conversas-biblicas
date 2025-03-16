@@ -360,7 +360,10 @@ const LanguageContext = createContext<LanguageContextProps | undefined>(undefine
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Initialize language on mount
-  const [language, setLanguage] = useState(() => i18n.init());
+  const [language, setLanguage] = useState<string>(() => {
+    i18n.init();
+    return i18n.language();
+  });
 
   const changeLanguage = useCallback((lang: string) => {
     i18n.changeLanguage(lang);
@@ -375,7 +378,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return key;
     }
     
-    return translation[language as keyof TranslationLanguages] || translation["en"] || key;
+    const currentLang = language as keyof TranslationLanguages;
+    return translation[currentLang] || translation["en"] || key;
   };
 
   return (
