@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useChat } from "@/context/chat";
@@ -134,7 +133,6 @@ const Chat = () => {
     });
   };
 
-  // Garantir que messages seja sempre um array, mesmo quando currentConversation é null
   const messages = currentConversation?.messages || [];
   
   console.log("Rendering messages:", messages);

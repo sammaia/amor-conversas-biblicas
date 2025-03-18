@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import i18n from '../i18n';
 
@@ -69,7 +68,8 @@ export type TranslationKey =
   | "save"
   | "cancel"
   | "back"
-  | "emptyFolder";
+  | "emptyFolder"
+  | "startConversation";
 
 // Tipo para as traduções
 type TranslationLanguages = {
@@ -347,6 +347,10 @@ const translations: Translations = {
   emptyFolder: {
     pt: "Pasta vazia",
     en: "Empty folder"
+  },
+  startConversation: {
+    pt: "Iniciar Conversa",
+    en: "Start Conversation"
   }
 };
 

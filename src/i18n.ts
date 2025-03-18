@@ -1,4 +1,3 @@
-
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -40,6 +39,7 @@ const resources = {
       typeMessage: 'Type your message',
       send: 'Send',
       clearChat: 'Clear chat',
+      startConversation: 'Start a new conversation',
 
       // Página da Bíblia
       bibleBrowser: 'Bible Browser',
@@ -112,6 +112,7 @@ const resources = {
       typeMessage: 'Digite sua mensagem',
       send: 'Enviar',
       clearChat: 'Limpar chat',
+      startConversation: 'Iniciar uma nova conversa',
 
       // Página da Bíblia
       bibleBrowser: 'Navegador da Bíblia',
