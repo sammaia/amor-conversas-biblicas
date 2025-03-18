@@ -17,6 +17,7 @@ export const useChatContext = () => {
   const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
+  const [initialized, setInitialized] = useState(false);
 
   // Effect to load conversations and folders from localStorage
   useEffect(() => {
@@ -26,6 +27,7 @@ export const useChatContext = () => {
       
       if (parsedConversations.length > 0) {
         setConversations(parsedConversations);
+        // Sempre selecione a primeira conversa como atual
         setCurrentConversation(parsedConversations[0]);
       } else {
         const newConv = initializeNewConversation();
@@ -39,23 +41,28 @@ export const useChatContext = () => {
       }
     } else {
       console.log("No user, creating new conversation");
-      setConversations([]);
-      setFolders([]);
       const newConv = initializeNewConversation();
       setCurrentConversation(newConv);
       setConversations([newConv]);
     }
+    
+    setInitialized(true);
   }, [user]);
 
   // Save conversations to localStorage whenever they change
   useEffect(() => {
-    saveConversationsToLocalStorage(conversations, user?.id);
-  }, [conversations, user]);
+    if (initialized) {
+      console.log("Saving conversations:", conversations);
+      saveConversationsToLocalStorage(conversations, user?.id);
+    }
+  }, [conversations, user, initialized]);
 
   // Save folders to localStorage whenever they change
   useEffect(() => {
-    saveFoldersToLocalStorage(folders, user?.id);
-  }, [folders, user]);
+    if (initialized) {
+      saveFoldersToLocalStorage(folders, user?.id);
+    }
+  }, [folders, user, initialized]);
 
   const startNewConversation = () => {
     console.log("Starting new conversation");
@@ -86,11 +93,7 @@ export const useChatContext = () => {
       };
       
       setCurrentConversation(updatedConversation);
-      setConversations((prev) => 
-        prev.map((conv) => 
-          conv.id === updatedConversation.id ? updatedConversation : conv
-        )
-      );
+      setConversations([updatedConversation]);
       
       return;
     }
@@ -111,11 +114,20 @@ export const useChatContext = () => {
     
     setCurrentConversation(updatedConversation);
     
-    setConversations((prev) => 
-      prev.map((conv) => 
-        conv.id === updatedConversation.id ? updatedConversation : conv
-      )
-    );
+    setConversations((prev) => {
+      // Verificar se a conversa atual já existe na lista
+      const exists = prev.some(conv => conv.id === updatedConversation.id);
+      
+      if (exists) {
+        // Atualizar a conversa existente
+        return prev.map((conv) => 
+          conv.id === updatedConversation.id ? updatedConversation : conv
+        );
+      } else {
+        // Adicionar a nova conversa no início da lista
+        return [updatedConversation, ...prev];
+      }
+    });
     
     console.log("Updated conversation:", updatedConversation);
   };
@@ -261,7 +273,10 @@ export const useChatContext = () => {
     const conversation = conversations.find((conv) => conv.id === conversationId);
     
     if (conversation) {
+      console.log("Loading conversation:", conversation);
       setCurrentConversation(conversation);
+    } else {
+      console.error("Conversation not found:", conversationId);
     }
   };
 

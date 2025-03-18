@@ -1,21 +1,22 @@
 
-import { Conversation, Message } from "@/types/chat";
+import { Conversation, Message, Folder } from "@/types/chat";
 
 export const initializeNewConversation = (): Conversation => {
   console.log("Initializing new conversation");
+  const timestamp = Date.now();
   return {
-    id: Date.now().toString(),
+    id: timestamp.toString(),
     title: "New Conversation",
     messages: [
       {
-        id: "welcome",
+        id: "welcome-" + timestamp,
         text: "Hello! How can I help you today? I'm your spiritual assistant based on Biblical teachings.",
         sender: "assistant",
-        timestamp: Date.now(),
+        timestamp: timestamp,
       },
     ],
-    createdAt: Date.now(),
-    updatedAt: Date.now(),
+    createdAt: timestamp,
+    updatedAt: timestamp,
   };
 };
 
@@ -23,48 +24,62 @@ export const saveConversationsToLocalStorage = (
   conversations: Conversation[],
   userId?: string
 ) => {
-  if (userId) {
-    localStorage.setItem(
-      `conversations-${userId}`,
-      JSON.stringify(conversations)
-    );
+  try {
+    const key = userId ? `conversations-${userId}` : "conversations-guest";
+    localStorage.setItem(key, JSON.stringify(conversations));
+    console.log("Saved conversations to localStorage:", key, conversations.length);
+  } catch (error) {
+    console.error("Error saving conversations to localStorage:", error);
   }
 };
 
 export const saveFoldersToLocalStorage = (
-  folders: any[],
+  folders: Folder[],
   userId?: string
 ) => {
-  if (userId && folders.length > 0) {
-    localStorage.setItem(
-      `folders-${userId}`,
-      JSON.stringify(folders)
-    );
+  try {
+    if (folders.length > 0) {
+      const key = userId ? `folders-${userId}` : "folders-guest";
+      localStorage.setItem(key, JSON.stringify(folders));
+      console.log("Saved folders to localStorage:", key, folders.length);
+    }
+  } catch (error) {
+    console.error("Error saving folders to localStorage:", error);
   }
 };
 
 export const getConversationsFromLocalStorage = (userId?: string): Conversation[] => {
-  if (!userId) return [];
-  
-  const storedConversations = localStorage.getItem(`conversations-${userId}`);
-  if (!storedConversations) return [];
-  
   try {
-    return JSON.parse(storedConversations);
+    const key = userId ? `conversations-${userId}` : "conversations-guest";
+    const storedConversations = localStorage.getItem(key);
+    
+    if (!storedConversations) {
+      console.log("No conversations found in localStorage for key:", key);
+      return [];
+    }
+    
+    const parsedConversations = JSON.parse(storedConversations) as Conversation[];
+    console.log("Loaded conversations from localStorage:", key, parsedConversations.length);
+    return parsedConversations;
   } catch (error) {
     console.error("Error parsing stored conversations:", error);
     return [];
   }
 };
 
-export const getFoldersFromLocalStorage = (userId?: string): any[] => {
-  if (!userId) return [];
-  
-  const storedFolders = localStorage.getItem(`folders-${userId}`);
-  if (!storedFolders) return [];
-  
+export const getFoldersFromLocalStorage = (userId?: string): Folder[] => {
   try {
-    return JSON.parse(storedFolders);
+    const key = userId ? `folders-${userId}` : "folders-guest";
+    const storedFolders = localStorage.getItem(key);
+    
+    if (!storedFolders) {
+      console.log("No folders found in localStorage for key:", key);
+      return [];
+    }
+    
+    const parsedFolders = JSON.parse(storedFolders) as Folder[];
+    console.log("Loaded folders from localStorage:", key, parsedFolders.length);
+    return parsedFolders;
   } catch (error) {
     console.error("Error parsing stored folders:", error);
     return [];
