@@ -1,7 +1,6 @@
-
 import { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { useChat } from "@/context/ChatContext";
+import { useChat } from "@/context/chat";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Star, StarOff, FolderPlus, Key, PlusCircle } from "lucide-react";
@@ -132,7 +131,6 @@ const Chat = () => {
     });
   };
 
-  // Make sure we display messages, even if the conversation is undefined
   const messages = currentConversation?.messages || [];
 
   console.log("Current conversation:", currentConversation);

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Header from "@/components/Header";
 import DailyVerse from "@/components/DailyVerse";
@@ -6,7 +5,7 @@ import Chat from "@/components/Chat";
 import Footer from "@/components/Footer";
 import ConversationHistory from "@/components/ConversationHistory";
 import { useLanguage } from "@/context/LanguageContext";
-import { ChatProvider } from "@/context/ChatContext";
+import { ChatProvider } from "@/context/chat";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { History, BookOpen } from "lucide-react";

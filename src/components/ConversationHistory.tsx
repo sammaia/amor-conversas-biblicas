@@ -1,7 +1,6 @@
-
 import { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-import { useChat } from "@/context/ChatContext";
+import { useChat } from "@/context/chat";
 import { format } from "date-fns";
 import { 
   Sheet, 
