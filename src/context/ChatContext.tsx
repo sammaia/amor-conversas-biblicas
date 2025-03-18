@@ -32,13 +32,14 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [folders, setFolders] = useState<Folder[]>([]);
 
   const initializeNewConversation = () => {
+    console.log("Initializing new conversation");
     const newConversation: Conversation = {
       id: Date.now().toString(),
-      title: t("newConversation"),
+      title: "New Conversation",
       messages: [
         {
           id: "welcome",
-          text: t("chatWelcome"),
+          text: "Hello! How can I help you today? I'm your spiritual assistant based on Biblical teachings.",
           sender: "assistant",
           timestamp: Date.now(),
         },
@@ -49,21 +50,35 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     
     setCurrentConversation(newConversation);
     setConversations((prev) => [newConversation, ...prev]);
+    
+    // Also save to localStorage
+    if (user) {
+      const updatedConversations = [newConversation, ...conversations];
+      localStorage.setItem(`conversations-${user.id}`, JSON.stringify(updatedConversations));
+    }
+    
     return newConversation;
   };
 
+  // Effect to load conversations and folders from localStorage
   useEffect(() => {
     if (user) {
+      console.log("Loading user data");
       const storedConversations = localStorage.getItem(`conversations-${user.id}`);
       const storedFolders = localStorage.getItem(`folders-${user.id}`);
       
       if (storedConversations) {
-        const parsedConversations = JSON.parse(storedConversations);
-        setConversations(parsedConversations);
-        
-        if (parsedConversations.length > 0) {
-          setCurrentConversation(parsedConversations[0]);
-        } else {
+        try {
+          const parsedConversations = JSON.parse(storedConversations);
+          setConversations(parsedConversations);
+          
+          if (parsedConversations.length > 0) {
+            setCurrentConversation(parsedConversations[0]);
+          } else {
+            initializeNewConversation();
+          }
+        } catch (error) {
+          console.error("Error parsing stored conversations:", error);
           initializeNewConversation();
         }
       } else {
@@ -71,21 +86,29 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       }
       
       if (storedFolders) {
-        setFolders(JSON.parse(storedFolders));
+        try {
+          setFolders(JSON.parse(storedFolders));
+        } catch (error) {
+          console.error("Error parsing stored folders:", error);
+          setFolders([]);
+        }
       }
     } else {
+      console.log("No user, creating new conversation");
       setConversations([]);
       setFolders([]);
       initializeNewConversation();
     }
   }, [user]);
 
+  // Save conversations to localStorage whenever they change
   useEffect(() => {
     if (user && conversations.length > 0) {
       localStorage.setItem(`conversations-${user.id}`, JSON.stringify(conversations));
     }
   }, [conversations, user]);
 
+  // Save folders to localStorage whenever they change
   useEffect(() => {
     if (user && folders.length > 0) {
       localStorage.setItem(`folders-${user.id}`, JSON.stringify(folders));
@@ -93,27 +116,15 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   }, [folders, user]);
 
   const startNewConversation = () => {
-    const newConversation: Conversation = {
-      id: Date.now().toString(),
-      title: t("newConversation"),
-      messages: [
-        {
-          id: "welcome",
-          text: t("chatWelcome"),
-          sender: "assistant",
-          timestamp: Date.now(),
-        },
-      ],
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-    
-    setCurrentConversation(newConversation);
-    setConversations((prev) => [newConversation, ...prev]);
+    console.log("Starting new conversation");
+    const newConversation = initializeNewConversation();
   };
 
   const addMessage = (text: string, sender: "user" | "assistant") => {
+    console.log("Adding message:", { text, sender });
+    
     if (!currentConversation) {
+      console.log("No current conversation, creating one");
       const newConv = initializeNewConversation();
       
       const newMessage: Message = {
@@ -161,6 +172,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
         conv.id === updatedConversation.id ? updatedConversation : conv
       )
     );
+    
+    console.log("Updated conversation:", updatedConversation);
   };
 
   const toggleFavorite = (messageId: string) => {
@@ -188,8 +201,8 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     
     toast({
       title: updatedMessages.find(m => m.id === messageId)?.favorite 
-        ? t("addedToFavorites")
-        : t("removedFromFavorites"),
+        ? "Added to favorites"
+        : "Removed from favorites",
       duration: 1500,
     });
   };
@@ -211,7 +224,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     setFolders((prev) => [...prev, newFolder]);
     
     toast({
-      title: t("folderCreated"),
+      title: "Folder created",
       description: name,
     });
   };
@@ -224,7 +237,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     );
     
     toast({
-      title: t("folderRenamed"),
+      title: "Folder renamed",
       description: newName,
     });
   };
@@ -237,7 +250,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     setFolders((prev) => prev.filter((folder) => folder.id !== folderId));
     
     toast({
-      title: t("folderDeleted"),
+      title: "Folder deleted",
       description: folderToDelete.name,
     });
   };
@@ -249,7 +262,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     
     if (folder.messageIds.includes(messageId)) {
       toast({
-        title: t("messageAlreadyInFolder"),
+        title: "Message already in folder",
         duration: 1500,
       });
       return;
@@ -264,7 +277,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     );
     
     toast({
-      title: t("addedToFolder"),
+      title: "Added to folder",
       description: folder.name,
       duration: 1500,
     });
@@ -284,7 +297,7 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
     );
     
     toast({
-      title: t("removedFromFolder"),
+      title: "Removed from folder",
       description: folder.name,
       duration: 1500,
     });

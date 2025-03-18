@@ -108,13 +108,13 @@ const Chat = () => {
       saveApiKey(apiKey.trim());
       setShowApiKeyDialog(false);
       toast({
-        title: t("apiKeySaved"),
-        description: t("apiKeyStoredLocally"),
+        title: "API Key Saved",
+        description: "Your API key has been stored locally.",
       });
     } else {
       toast({
-        title: t("apiKeyError"),
-        description: t("pleaseEnterValidApiKey"),
+        title: "API Key Error",
+        description: "Please enter a valid API key.",
         variant: "destructive",
       });
     }
@@ -127,12 +127,16 @@ const Chat = () => {
   const handleNewChat = () => {
     startNewConversation();
     toast({
-      title: t("newChatStarted"),
+      title: "New chat started",
       duration: 2000
     });
   };
 
+  // Make sure we display messages, even if the conversation is undefined
   const messages = currentConversation?.messages || [];
+
+  console.log("Current conversation:", currentConversation);
+  console.log("Messages:", messages);
 
   return (
     <motion.div 
@@ -154,7 +158,7 @@ const Chat = () => {
               className="text-sky-600 border-sky-200 hover:bg-sky-50"
             >
               <PlusCircle className="h-4 w-4 mr-1" />
-              {t("newChat")}
+              New Chat
             </Button>
             <Button
               variant="outline"
@@ -270,9 +274,9 @@ const Chat = () => {
       <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t("configureOpenAIApiKey")}</DialogTitle>
+            <DialogTitle>Configure OpenAI API Key</DialogTitle>
             <DialogDescription>
-              {t("apiKeyDescription")}
+              Enter your OpenAI API key to enable the chat functionality.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -286,7 +290,7 @@ const Chat = () => {
                 onChange={(e) => setApiKey(e.target.value)}
               />
               <p className="text-xs text-slate-500">
-                {t("getApiKeyAt")}: 
+                Get your API key at: 
                 <a 
                   href="https://platform.openai.com/api-keys" 
                   target="_blank" 
@@ -300,7 +304,7 @@ const Chat = () => {
           </div>
           <DialogFooter>
             <Button type="button" onClick={handleSaveApiKey}>
-              {t("saveApiKey")}
+              Save API Key
             </Button>
           </DialogFooter>
         </DialogContent>
