@@ -85,3 +85,13 @@ export const getFoldersFromLocalStorage = (userId?: string): Folder[] => {
     return [];
   }
 };
+
+// Helper function to convert database date format to timestamp
+export const dateToTimestamp = (dateString: string): number => {
+  return new Date(dateString).getTime();
+};
+
+// Helper function to convert timestamp to database date format
+export const timestampToDate = (timestamp: number): string => {
+  return new Date(timestamp).toISOString();
+};

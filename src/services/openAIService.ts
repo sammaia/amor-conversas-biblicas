@@ -1,12 +1,13 @@
+
 import OpenAI from "openai";
 import { getConfig, saveConfig, hasConfig, ConfigKeys } from "./configService";
 
-// Função para obter a chave da API através do serviço de configuração
+// Function to get the API key from the configuration service
 const getApiKey = (): string | null => {
   return getConfig(ConfigKeys.OPENAI_API_KEY);
 };
 
-// Inicializa o cliente da OpenAI com a chave da API
+// Initialize the OpenAI client with the API key
 const getOpenAIClient = () => {
   const apiKey = getApiKey();
   if (!apiKey) {
@@ -15,11 +16,11 @@ const getOpenAIClient = () => {
   
   return new OpenAI({
     apiKey,
-    dangerouslyAllowBrowser: true // Somente para desenvolvimento, remova em produção
+    dangerouslyAllowBrowser: true // Only for development, remove in production
   });
 };
 
-// Mensagem de sistema que define o comportamento do assistente
+// System message that defines the assistant's behavior
 const systemMessage = `
 Você é um assistente espiritual cristão evangélico que responde baseando-se exclusivamente na Bíblia.
 Seu objetivo é ajudar os usuários a encontrar orientação espiritual, entender passagens bíblicas
@@ -39,27 +40,27 @@ Você deve manter o mesmo idioma que o usuário utiliza (português, inglês ou 
 `;
 
 /**
- * Verifica se a chave da API está configurada
- * @returns boolean indicando se a chave existe
+ * Checks if the API key is configured
+ * @returns boolean indicating if the key exists
  */
 export const isApiKeyConfigured = (): boolean => {
   return hasConfig(ConfigKeys.OPENAI_API_KEY);
 };
 
 /**
- * Salva a chave da API de forma segura
- * @param key Chave da API da OpenAI
+ * Saves the API key securely
+ * @param key OpenAI API key
  */
 export const saveApiKey = (key: string): void => {
   saveConfig(ConfigKeys.OPENAI_API_KEY, key);
 };
 
 /**
- * Envia uma mensagem para a API da OpenAI e retorna a resposta.
+ * Sends a message to the OpenAI API and returns the response.
  * 
- * @param message Mensagem do usuário
- * @param language Idioma atual (para garantir que a resposta venha no mesmo idioma)
- * @returns Promise com a resposta da API
+ * @param message User message
+ * @param language Current language (to ensure response in the same language)
+ * @returns Promise with the API response
  */
 export const sendMessageToOpenAI = async (message: string, language: string): Promise<string> => {
   try {
@@ -69,7 +70,7 @@ export const sendMessageToOpenAI = async (message: string, language: string): Pr
 
     const openai = getOpenAIClient();
 
-    // Ajusta o pedido de idioma baseado na seleção atual
+    // Adjust language prompt based on current selection
     let languagePrompt = "";
     if (language === "pt") {
       languagePrompt = "Responda em português brasileiro.";
@@ -80,7 +81,7 @@ export const sendMessageToOpenAI = async (message: string, language: string): Pr
     }
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // Modelo mais barato
+      model: "gpt-3.5-turbo", // Cheaper model
       messages: [
         { role: "system", content: systemMessage + " " + languagePrompt },
         { role: "user", content: message }
@@ -89,7 +90,7 @@ export const sendMessageToOpenAI = async (message: string, language: string): Pr
       max_tokens: 500,
     });
 
-    // Retorna a resposta ou uma mensagem de erro amigável
+    // Return the response or a friendly error message
     return completion.choices[0]?.message?.content || 
            "Desculpe, não consegui processar sua mensagem neste momento. Por favor, tente novamente.";
   } catch (error) {
@@ -99,4 +100,41 @@ export const sendMessageToOpenAI = async (message: string, language: string): Pr
     }
     return "Estou em oração neste momento. Por favor, tente novamente em alguns instantes.";
   }
+};
+
+/**
+ * Function that returns the last messages from a conversation formatted for OpenAI
+ * This will be useful for maintaining context in a conversation
+ * 
+ * @param messages Array of messages from the conversation
+ * @param maxTokens Maximum number of tokens to include
+ * @returns Array of messages formatted for OpenAI
+ */
+export const getFormattedMessagesForAPI = (messages, maxTokens = 2000) => {
+  // Start with the system message
+  const formattedMessages = [
+    { role: "system", content: systemMessage }
+  ];
+  
+  // Add the most recent messages, up to a certain token limit
+  // This is a simplified approach - in a real app you'd want to count tokens properly
+  let estimatedTokens = systemMessage.length / 4; // Rough estimate: 4 chars ≈ 1 token
+  
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i];
+    const estimatedMessageTokens = message.text.length / 4;
+    
+    if (estimatedTokens + estimatedMessageTokens > maxTokens) {
+      break;
+    }
+    
+    formattedMessages.unshift({
+      role: message.sender === "user" ? "user" : "assistant",
+      content: message.text
+    });
+    
+    estimatedTokens += estimatedMessageTokens;
+  }
+  
+  return formattedMessages;
 };

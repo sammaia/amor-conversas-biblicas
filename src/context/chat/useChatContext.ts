@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -10,6 +9,7 @@ import {
   getConversationsFromLocalStorage,
   getFoldersFromLocalStorage
 } from "./utils";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useChatContext = () => {
   const { user } = useAuth();
@@ -18,16 +18,87 @@ export const useChatContext = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [initialized, setInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Effect to load conversations and folders from localStorage
+  // Effect to load conversations and folders
   useEffect(() => {
-    if (user) {
-      console.log("Loading user data");
-      const parsedConversations = getConversationsFromLocalStorage(user.id);
+    const loadData = async () => {
+      setIsLoading(true);
+      if (user) {
+        console.log("Loading user data from Supabase");
+        try {
+          // Get conversations from Supabase
+          const { data: conversationsData, error: conversationsError } = await supabase
+            .from('conversations')
+            .select('*')
+            .order('updated_at', { ascending: false });
+
+          if (conversationsError) throw conversationsError;
+
+          if (conversationsData && conversationsData.length > 0) {
+            const fullConversations = await Promise.all(
+              conversationsData.map(async (conv) => {
+                // Get messages for each conversation
+                const { data: messagesData, error: messagesError } = await supabase
+                  .from('messages')
+                  .select('*')
+                  .eq('conversation_id', conv.id)
+                  .order('timestamp', { ascending: true });
+
+                if (messagesError) throw messagesError;
+
+                return {
+                  id: conv.id,
+                  title: conv.title,
+                  messages: messagesData ? messagesData.map(msg => ({
+                    id: msg.id,
+                    text: msg.text,
+                    sender: msg.sender,
+                    timestamp: new Date(msg.timestamp).getTime(),
+                    favorite: msg.favorite || false
+                  })) : [],
+                  createdAt: new Date(conv.created_at).getTime(),
+                  updatedAt: new Date(conv.updated_at).getTime()
+                };
+              })
+            );
+
+            setConversations(fullConversations);
+            setCurrentConversation(fullConversations[0]);
+          } else {
+            // Create a new conversation if none exists
+            const newConv = initializeNewConversation();
+            await createConversationInDatabase(newConv);
+            setCurrentConversation(newConv);
+            setConversations([newConv]);
+          }
+
+          // Load folders from localStorage (will be migrated to Supabase in the future)
+          const parsedFolders = getFoldersFromLocalStorage(user.id);
+          if (parsedFolders.length > 0) {
+            setFolders(parsedFolders);
+          }
+        } catch (error) {
+          console.error("Error loading data from Supabase:", error);
+          // Fallback to localStorage
+          loadFromLocalStorage(user.id);
+        }
+      } else {
+        console.log("No user, creating new conversation");
+        // For guest users, we'll continue using localStorage
+        loadFromLocalStorage();
+      }
+      
+      setInitialized(true);
+      setIsLoading(false);
+    };
+
+    const loadFromLocalStorage = (userId?: string) => {
+      const parsedConversations = getConversationsFromLocalStorage(userId);
       
       if (parsedConversations.length > 0) {
         setConversations(parsedConversations);
-        // Sempre selecione a primeira conversa como atual
+        // Always select the first conversation as the current one
         setCurrentConversation(parsedConversations[0]);
       } else {
         const newConv = initializeNewConversation();
@@ -35,27 +106,14 @@ export const useChatContext = () => {
         setConversations([newConv]);
       }
       
-      const parsedFolders = getFoldersFromLocalStorage(user.id);
+      const parsedFolders = getFoldersFromLocalStorage(userId);
       if (parsedFolders.length > 0) {
         setFolders(parsedFolders);
       }
-    } else {
-      console.log("No user, creating new conversation");
-      const newConv = initializeNewConversation();
-      setCurrentConversation(newConv);
-      setConversations([newConv]);
-    }
-    
-    setInitialized(true);
-  }, [user]);
+    };
 
-  // Save conversations to localStorage whenever they change
-  useEffect(() => {
-    if (initialized) {
-      console.log("Saving conversations:", conversations);
-      saveConversationsToLocalStorage(conversations, user?.id);
-    }
-  }, [conversations, user, initialized]);
+    loadData();
+  }, [user]);
 
   // Save folders to localStorage whenever they change
   useEffect(() => {
@@ -64,14 +122,123 @@ export const useChatContext = () => {
     }
   }, [folders, user, initialized]);
 
-  const startNewConversation = () => {
+  // Function to create a conversation in the database
+  const createConversationInDatabase = async (conversation: Conversation) => {
+    if (!user) {
+      console.log("No user, saving to localStorage only");
+      return;
+    }
+
+    try {
+      // Insert conversation
+      const { data: convData, error: convError } = await supabase
+        .from('conversations')
+        .insert({
+          id: conversation.id,
+          title: conversation.title,
+          user_id: user.id,
+          created_at: new Date(conversation.createdAt).toISOString(),
+          updated_at: new Date(conversation.updatedAt).toISOString()
+        })
+        .select()
+        .single();
+
+      if (convError) throw convError;
+
+      // Insert messages
+      if (conversation.messages.length > 0) {
+        const messagesForDb = conversation.messages.map(msg => ({
+          conversation_id: conversation.id,
+          text: msg.text,
+          sender: msg.sender,
+          timestamp: new Date(msg.timestamp).toISOString(),
+          favorite: msg.favorite || false,
+          role: msg.sender === "user" ? "user" : "assistant"
+        }));
+
+        const { error: msgError } = await supabase
+          .from('messages')
+          .insert(messagesForDb);
+
+        if (msgError) throw msgError;
+      }
+
+      console.log("Conversation created in database:", convData);
+    } catch (error) {
+      console.error("Error creating conversation in database:", error);
+      // Fall back to localStorage
+      saveConversationsToLocalStorage(conversations, user.id);
+    }
+  };
+
+  // Function to update a conversation in the database
+  const updateConversationInDatabase = async (conversation: Conversation) => {
+    if (!user) {
+      console.log("No user, saving to localStorage only");
+      return;
+    }
+
+    try {
+      // Update conversation record
+      const { error: convError } = await supabase
+        .from('conversations')
+        .update({
+          title: conversation.title,
+          updated_at: new Date(conversation.updatedAt).toISOString()
+        })
+        .eq('id', conversation.id);
+
+      if (convError) throw convError;
+      console.log("Conversation updated in database");
+    } catch (error) {
+      console.error("Error updating conversation in database:", error);
+      // Fall back to localStorage
+      saveConversationsToLocalStorage(conversations, user.id);
+    }
+  };
+
+  // Function to add a message to the database
+  const addMessageToDatabase = async (message: Message, conversationId: string) => {
+    if (!user) {
+      console.log("No user, saving to localStorage only");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .insert({
+          id: message.id,
+          conversation_id: conversationId,
+          text: message.text,
+          sender: message.sender,
+          timestamp: new Date(message.timestamp).toISOString(),
+          favorite: message.favorite || false,
+          role: message.sender === "user" ? "user" : "assistant"
+        });
+
+      if (error) throw error;
+      console.log("Message added to database");
+    } catch (error) {
+      console.error("Error adding message to database:", error);
+      // Fall back to localStorage
+      saveConversationsToLocalStorage(conversations, user.id);
+    }
+  };
+
+  const startNewConversation = async () => {
     console.log("Starting new conversation");
     const newConversation = initializeNewConversation();
+    
+    if (user) {
+      await createConversationInDatabase(newConversation);
+    }
+    
     setCurrentConversation(newConversation);
     setConversations((prev) => [newConversation, ...prev]);
   };
 
-  const addMessage = (text: string, sender: "user" | "assistant") => {
+  const addMessage = async (text: string, sender: "user" | "assistant") => {
     console.log("Adding message:", { text, sender });
     
     if (!currentConversation) {
@@ -95,6 +262,12 @@ export const useChatContext = () => {
       setCurrentConversation(updatedConversation);
       setConversations([updatedConversation]);
       
+      if (user) {
+        await createConversationInDatabase(updatedConversation);
+      } else {
+        saveConversationsToLocalStorage([updatedConversation]);
+      }
+      
       return;
     }
     
@@ -115,29 +288,45 @@ export const useChatContext = () => {
     setCurrentConversation(updatedConversation);
     
     setConversations((prev) => {
-      // Verificar se a conversa atual já existe na lista
+      // Check if the current conversation already exists in the list
       const exists = prev.some(conv => conv.id === updatedConversation.id);
       
       if (exists) {
-        // Atualizar a conversa existente
+        // Update the existing conversation
         return prev.map((conv) => 
           conv.id === updatedConversation.id ? updatedConversation : conv
         );
       } else {
-        // Adicionar a nova conversa no início da lista
+        // Add the new conversation to the beginning of the list
         return [updatedConversation, ...prev];
       }
     });
     
+    if (user) {
+      await addMessageToDatabase(newMessage, currentConversation.id);
+      await updateConversationInDatabase(updatedConversation);
+    } else {
+      saveConversationsToLocalStorage(
+        conversations.map(conv => 
+          conv.id === updatedConversation.id ? updatedConversation : conv
+        )
+      );
+    }
+    
     console.log("Updated conversation:", updatedConversation);
   };
 
-  const toggleFavorite = (messageId: string) => {
+  const toggleFavorite = async (messageId: string) => {
     if (!currentConversation) return;
+    
+    const messageToUpdate = currentConversation.messages.find(m => m.id === messageId);
+    if (!messageToUpdate) return;
+    
+    const newFavoriteValue = !messageToUpdate.favorite;
     
     const updatedMessages = currentConversation.messages.map((message) => {
       if (message.id === messageId) {
-        return { ...message, favorite: !message.favorite };
+        return { ...message, favorite: newFavoriteValue };
       }
       return message;
     });
@@ -155,10 +344,28 @@ export const useChatContext = () => {
       )
     );
     
+    // Update in database if user is logged in
+    if (user) {
+      try {
+        const { error } = await supabase
+          .from('messages')
+          .update({ favorite: newFavoriteValue })
+          .eq('id', messageId);
+          
+        if (error) throw error;
+      } catch (error) {
+        console.error("Error updating message favorite status:", error);
+      }
+    } else {
+      saveConversationsToLocalStorage(
+        conversations.map(conv => 
+          conv.id === updatedConversation.id ? updatedConversation : conv
+        )
+      );
+    }
+    
     toast({
-      title: updatedMessages.find(m => m.id === messageId)?.favorite 
-        ? "Added to favorites"
-        : "Removed from favorites",
+      title: newFavoriteValue ? "Added to favorites" : "Removed from favorites",
       duration: 1500,
     });
   };
@@ -269,14 +476,59 @@ export const useChatContext = () => {
       .filter((message) => folder.messageIds.includes(message.id));
   };
 
-  const loadConversation = (conversationId: string) => {
-    const conversation = conversations.find((conv) => conv.id === conversationId);
-    
-    if (conversation) {
-      console.log("Loading conversation:", conversation);
-      setCurrentConversation(conversation);
+  const loadConversation = async (conversationId: string) => {
+    if (user) {
+      try {
+        // Get the conversation from Supabase
+        const { data: conversationData, error: convError } = await supabase
+          .from('conversations')
+          .select('*')
+          .eq('id', conversationId)
+          .single();
+          
+        if (convError) throw convError;
+        
+        // Get messages for the conversation
+        const { data: messagesData, error: msgError } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', conversationId)
+          .order('timestamp', { ascending: true });
+          
+        if (msgError) throw msgError;
+        
+        const conversation: Conversation = {
+          id: conversationData.id,
+          title: conversationData.title,
+          messages: messagesData.map(msg => ({
+            id: msg.id,
+            text: msg.text,
+            sender: msg.sender,
+            timestamp: new Date(msg.timestamp).getTime(),
+            favorite: msg.favorite || false
+          })),
+          createdAt: new Date(conversationData.created_at).getTime(),
+          updatedAt: new Date(conversationData.updated_at).getTime()
+        };
+        
+        setCurrentConversation(conversation);
+      } catch (error) {
+        console.error("Error loading conversation from Supabase:", error);
+        // Fallback to local state
+        const conversation = conversations.find((conv) => conv.id === conversationId);
+        if (conversation) {
+          setCurrentConversation(conversation);
+        }
+      }
     } else {
-      console.error("Conversation not found:", conversationId);
+      // For guest users, use the local state
+      const conversation = conversations.find((conv) => conv.id === conversationId);
+      if (conversation) {
+        console.log("Loading conversation from local state:", conversation);
+        setCurrentConversation(conversation);
+      } else {
+        console.error("Conversation not found:", conversationId);
+      }
     }
   };
 
@@ -284,6 +536,7 @@ export const useChatContext = () => {
     currentConversation,
     conversations,
     folders,
+    isLoading,
     startNewConversation,
     addMessage,
     toggleFavorite,
