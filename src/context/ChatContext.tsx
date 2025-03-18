@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -32,44 +31,61 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [folders, setFolders] = useState<Folder[]>([]);
 
-  // Load data from localStorage when component mounts or user changes
+  const initializeNewConversation = () => {
+    const newConversation: Conversation = {
+      id: Date.now().toString(),
+      title: t("newConversation"),
+      messages: [
+        {
+          id: "welcome",
+          text: t("chatWelcome"),
+          sender: "assistant",
+          timestamp: Date.now(),
+        },
+      ],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    
+    setCurrentConversation(newConversation);
+    setConversations((prev) => [newConversation, ...prev]);
+    return newConversation;
+  };
+
   useEffect(() => {
     if (user) {
       const storedConversations = localStorage.getItem(`conversations-${user.id}`);
       const storedFolders = localStorage.getItem(`folders-${user.id}`);
       
       if (storedConversations) {
-        setConversations(JSON.parse(storedConversations));
+        const parsedConversations = JSON.parse(storedConversations);
+        setConversations(parsedConversations);
+        
+        if (parsedConversations.length > 0) {
+          setCurrentConversation(parsedConversations[0]);
+        } else {
+          initializeNewConversation();
+        }
+      } else {
+        initializeNewConversation();
       }
       
       if (storedFolders) {
         setFolders(JSON.parse(storedFolders));
       }
-      
-      // Start a new conversation if none exists
-      if (!storedConversations || JSON.parse(storedConversations).length === 0) {
-        startNewConversation();
-      } else {
-        // Load the most recent conversation
-        const sortedConversations = JSON.parse(storedConversations);
-        setCurrentConversation(sortedConversations[0]);
-      }
     } else {
-      // Reset state when user logs out
       setConversations([]);
       setFolders([]);
-      startNewConversation();
+      initializeNewConversation();
     }
   }, [user]);
 
-  // Save conversations to localStorage whenever they change
   useEffect(() => {
     if (user && conversations.length > 0) {
       localStorage.setItem(`conversations-${user.id}`, JSON.stringify(conversations));
     }
   }, [conversations, user]);
 
-  // Save folders to localStorage whenever they change
   useEffect(() => {
     if (user && folders.length > 0) {
       localStorage.setItem(`folders-${user.id}`, JSON.stringify(folders));
@@ -97,7 +113,32 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addMessage = (text: string, sender: "user" | "assistant") => {
-    if (!currentConversation) return;
+    if (!currentConversation) {
+      const newConv = initializeNewConversation();
+      
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        text,
+        sender,
+        timestamp: Date.now(),
+      };
+      
+      const updatedMessages = [...newConv.messages, newMessage];
+      const updatedConversation = {
+        ...newConv,
+        messages: updatedMessages,
+        updatedAt: Date.now(),
+      };
+      
+      setCurrentConversation(updatedConversation);
+      setConversations((prev) => 
+        prev.map((conv) => 
+          conv.id === updatedConversation.id ? updatedConversation : conv
+        )
+      );
+      
+      return;
+    }
     
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -106,9 +147,10 @@ export const ChatProvider = ({ children }: { children: ReactNode }) => {
       timestamp: Date.now(),
     };
     
+    const updatedMessages = [...currentConversation.messages, newMessage];
     const updatedConversation = {
       ...currentConversation,
-      messages: [...currentConversation.messages, newMessage],
+      messages: updatedMessages,
       updatedAt: Date.now(),
     };
     
