@@ -78,11 +78,12 @@ const Chat = () => {
     setIsSubmitting(true);
     
     try {
-      // Adiciona a mensagem do usuário primeiro
+      // Adiciona a mensagem do usuário primeiro e espera a conclusão
       await addMessage(userMessage, "user");
       
-      // Em seguida, obtém a resposta da IA e adiciona
+      // Em seguida, obtém a resposta da IA
       const botResponse = await sendMessageToOpenAI(userMessage, language);
+      // Adiciona a resposta da IA e espera a conclusão
       await addMessage(botResponse, "assistant");
     } catch (error) {
       console.error("Erro ao processar mensagem:", error);
@@ -137,6 +138,7 @@ const Chat = () => {
     });
   };
 
+  // Garantir que temos uma matriz de mensagens válida
   const messages = currentConversation?.messages || [];
   
   console.log("Rendering messages:", messages);
@@ -161,7 +163,7 @@ const Chat = () => {
               className="text-sky-600 border-sky-200 hover:bg-sky-50"
             >
               <PlusCircle className="h-4 w-4 mr-1" />
-              New Chat
+              {t("newConversation")}
             </Button>
             <Button
               variant="outline"
