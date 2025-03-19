@@ -41,10 +41,9 @@ const Chat = () => {
   const [selectedMessageId, setSelectedMessageId] = useState<string | null>(null);
   const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
   const [apiKey, setApiKey] = useState("");
+  const [apiKeyChecked, setApiKeyChecked] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-
-  console.log("Render Chat component with currentConversation:", currentConversation);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -54,10 +53,17 @@ const Chat = () => {
     scrollToBottom();
   }, [currentConversation?.messages]);
 
+  // Verifica a chave da API apenas uma vez ao carregar o componente
   useEffect(() => {
-    if (!isApiKeyConfigured()) {
-      setShowApiKeyDialog(true);
-    }
+    const checkApiKey = async () => {
+      const hasApiKey = await isApiKeyConfigured();
+      if (!hasApiKey) {
+        setShowApiKeyDialog(true);
+      }
+      setApiKeyChecked(true);
+    };
+
+    checkApiKey();
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -68,7 +74,8 @@ const Chat = () => {
     e.preventDefault();
     if (!input.trim() || isSubmitting) return;
 
-    if (!isApiKeyConfigured()) {
+    // Verificação da chave da API
+    if (apiKeyChecked && !(await isApiKeyConfigured())) {
       setShowApiKeyDialog(true);
       return;
     }
@@ -78,12 +85,12 @@ const Chat = () => {
     setIsSubmitting(true);
     
     try {
-      // Adiciona a mensagem do usuário primeiro e espera a conclusão
+      // Adiciona a mensagem do usuário primeiro
       await addMessage(userMessage, "user");
       
       // Em seguida, obtém a resposta da IA
       const botResponse = await sendMessageToOpenAI(userMessage, language);
-      // Adiciona a resposta da IA e espera a conclusão
+      // Adiciona a resposta da IA
       await addMessage(botResponse, "assistant");
     } catch (error) {
       console.error("Erro ao processar mensagem:", error);
@@ -109,18 +116,18 @@ const Chat = () => {
     setShowFolderSelector(true);
   };
 
-  const handleSaveApiKey = () => {
+  const handleSaveApiKey = async () => {
     if (apiKey.trim()) {
-      saveApiKey(apiKey.trim());
+      await saveApiKey(apiKey.trim());
       setShowApiKeyDialog(false);
       toast({
-        title: "API Key Saved",
-        description: "Your API key has been stored locally.",
+        title: "API Key Salva",
+        description: "Sua chave de API foi armazenada com segurança.",
       });
     } else {
       toast({
-        title: "API Key Error",
-        description: "Please enter a valid API key.",
+        title: "Erro na Chave API",
+        description: "Por favor, insira uma chave API válida.",
         variant: "destructive",
       });
     }
@@ -133,15 +140,13 @@ const Chat = () => {
   const handleNewChat = () => {
     startNewConversation();
     toast({
-      title: "New chat started",
+      title: "Nova conversa iniciada",
       duration: 2000
     });
   };
 
   // Garantir que temos uma matriz de mensagens válida
   const messages = currentConversation?.messages || [];
-  
-  console.log("Rendering messages:", messages);
 
   return (
     <motion.div 

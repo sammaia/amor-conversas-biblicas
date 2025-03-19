@@ -1,1 +1,40 @@
+
 project_id = "ukoksdbgtkhxyiseqyjl"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 5432
+shadow_port = 5433
+major_version = 15
+
+[studio]
+enabled = true
+port = 3001
+api_url = "http://localhost"
+
+[inbucket]
+enabled = true
+port = 2500
+smtp_port = 2500
+pop3_port = 1100
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 28800
+enable_refresh_token_rotation = true
+
+[functions]
+[functions.api-keys]
+verify_jwt = true

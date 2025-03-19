@@ -1,26 +1,45 @@
 
 import OpenAI from "openai";
 import { getConfig, saveConfig, hasConfig, ConfigKeys } from "./configService";
+import { supabase } from "@/integrations/supabase/client";
 
-// Function to get the API key from the configuration service
-const getApiKey = (): string | null => {
-  return getConfig(ConfigKeys.OPENAI_API_KEY);
+// Função para obter a chave da API do Supabase ou do localStorage como fallback
+const getApiKey = async (): Promise<string | null> => {
+  try {
+    // Tentar buscar do Supabase primeiro
+    const { data, error } = await supabase.functions.invoke('api-keys', {
+      method: 'POST',
+      body: { method: 'GET', action: 'openai' }
+    });
+
+    if (error) {
+      console.error("Erro ao buscar chave da API do Supabase:", error);
+      // Fallback: tentar buscar do localStorage
+      return getConfig(ConfigKeys.OPENAI_API_KEY);
+    }
+
+    return data.key;
+  } catch (error) {
+    console.error("Erro ao buscar chave da API:", error);
+    // Fallback: tentar buscar do localStorage
+    return getConfig(ConfigKeys.OPENAI_API_KEY);
+  }
 };
 
-// Initialize the OpenAI client with the API key
-const getOpenAIClient = () => {
-  const apiKey = getApiKey();
+// Inicializa o cliente OpenAI com a chave da API
+const getOpenAIClient = async () => {
+  const apiKey = await getApiKey();
   if (!apiKey) {
     throw new Error("API key not found");
   }
   
   return new OpenAI({
     apiKey,
-    dangerouslyAllowBrowser: true // Only for development, remove in production
+    dangerouslyAllowBrowser: true // Apenas para desenvolvimento, remover em produção
   });
 };
 
-// System message that defines the assistant's behavior
+// Mensagem do sistema que define o comportamento do assistente
 const systemMessage = `
 Você é um assistente espiritual cristão evangélico que responde baseando-se exclusivamente na Bíblia.
 Seu objetivo é ajudar os usuários a encontrar orientação espiritual, entender passagens bíblicas
@@ -40,37 +59,68 @@ Você deve manter o mesmo idioma que o usuário utiliza (português, inglês ou 
 `;
 
 /**
- * Checks if the API key is configured
- * @returns boolean indicating if the key exists
+ * Verifica se a chave da API está configurada
+ * @returns Promise com boolean indicando se a chave existe
  */
-export const isApiKeyConfigured = (): boolean => {
+export const isApiKeyConfigured = async (): Promise<boolean> => {
+  // Primeiro, verifica no Supabase
+  try {
+    const { data, error } = await supabase.functions.invoke('api-keys', {
+      method: 'POST',
+      body: { method: 'GET', action: 'openai' }
+    });
+
+    if (!error && data.key) {
+      return true;
+    }
+  } catch (error) {
+    console.error("Erro ao verificar chave da API no Supabase:", error);
+  }
+
+  // Fallback: verificar no localStorage
   return hasConfig(ConfigKeys.OPENAI_API_KEY);
 };
 
 /**
- * Saves the API key securely
- * @param key OpenAI API key
+ * Salva a chave da API no Supabase e como fallback no localStorage
+ * @param key Chave da API OpenAI
  */
-export const saveApiKey = (key: string): void => {
-  saveConfig(ConfigKeys.OPENAI_API_KEY, key);
+export const saveApiKey = async (key: string): Promise<void> => {
+  try {
+    // Tenta salvar no Supabase
+    const { data, error } = await supabase.functions.invoke('api-keys', {
+      method: 'POST',
+      body: { method: 'POST', action: 'openai', key }
+    });
+
+    if (error) {
+      console.error("Erro ao salvar chave da API no Supabase:", error);
+      // Fallback: salvar no localStorage
+      saveConfig(ConfigKeys.OPENAI_API_KEY, key);
+    }
+  } catch (error) {
+    console.error("Erro ao salvar chave da API:", error);
+    // Fallback: salvar no localStorage
+    saveConfig(ConfigKeys.OPENAI_API_KEY, key);
+  }
 };
 
 /**
- * Sends a message to the OpenAI API and returns the response.
+ * Envia uma mensagem para a API da OpenAI e retorna a resposta.
  * 
- * @param message User message
- * @param language Current language (to ensure response in the same language)
- * @returns Promise with the API response
+ * @param message Mensagem do usuário
+ * @param language Idioma atual (para garantir resposta no mesmo idioma)
+ * @returns Promise com a resposta da API
  */
 export const sendMessageToOpenAI = async (message: string, language: string): Promise<string> => {
   try {
-    if (!isApiKeyConfigured()) {
+    if (!(await isApiKeyConfigured())) {
       return "Por favor, configure sua chave API da OpenAI para continuar a conversa.";
     }
 
-    const openai = getOpenAIClient();
+    const openai = await getOpenAIClient();
 
-    // Adjust language prompt based on current selection
+    // Ajusta o prompt de idioma com base na seleção atual
     let languagePrompt = "";
     if (language === "pt") {
       languagePrompt = "Responda em português brasileiro.";
@@ -81,7 +131,7 @@ export const sendMessageToOpenAI = async (message: string, language: string): Pr
     }
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // Cheaper model
+      model: "gpt-3.5-turbo", // Modelo mais barato
       messages: [
         { role: "system", content: systemMessage + " " + languagePrompt },
         { role: "user", content: message }
@@ -90,7 +140,7 @@ export const sendMessageToOpenAI = async (message: string, language: string): Pr
       max_tokens: 500,
     });
 
-    // Return the response or a friendly error message
+    // Retorna a resposta ou uma mensagem de erro amigável
     return completion.choices[0]?.message?.content || 
            "Desculpe, não consegui processar sua mensagem neste momento. Por favor, tente novamente.";
   } catch (error) {
