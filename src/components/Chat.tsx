@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useChat } from "@/context/chat";
@@ -73,16 +74,19 @@ const Chat = () => {
     }
 
     const userMessage = input.trim();
-    addMessage(userMessage, "user");
     setInput("");
     setIsSubmitting(true);
-
+    
     try {
+      // Adiciona a mensagem do usuário primeiro
+      await addMessage(userMessage, "user");
+      
+      // Em seguida, obtém a resposta da IA e adiciona
       const botResponse = await sendMessageToOpenAI(userMessage, language);
-      addMessage(botResponse, "assistant");
+      await addMessage(botResponse, "assistant");
     } catch (error) {
       console.error("Erro ao processar mensagem:", error);
-      addMessage(t("aiError"), "assistant");
+      await addMessage(t("aiError"), "assistant");
     } finally {
       setIsSubmitting(false);
     }

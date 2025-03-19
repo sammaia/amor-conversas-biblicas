@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -141,15 +142,21 @@ export const useChatContext = () => {
     }
 
     try {
+      // Criar um ID no formato UUID para a conversa para compatibilidade com o Supabase
+      const conversationWithUUID = {
+        ...conversation,
+        id: crypto.randomUUID()
+      };
+
       // Insert conversation
       const { data: convData, error: convError } = await supabase
         .from('conversations')
         .insert({
-          id: conversation.id,
-          title: conversation.title,
+          id: conversationWithUUID.id,
+          title: conversationWithUUID.title,
           user_id: user.id,
-          created_at: new Date(conversation.createdAt).toISOString(),
-          updated_at: new Date(conversation.updatedAt).toISOString()
+          created_at: new Date(conversationWithUUID.createdAt).toISOString(),
+          updated_at: new Date(conversationWithUUID.updatedAt).toISOString()
         })
         .select()
         .single();
@@ -157,9 +164,10 @@ export const useChatContext = () => {
       if (convError) throw convError;
 
       // Insert messages
-      if (conversation.messages.length > 0) {
-        const messagesForDb = conversation.messages.map(msg => ({
-          conversation_id: conversation.id,
+      if (conversationWithUUID.messages.length > 0) {
+        const messagesForDb = conversationWithUUID.messages.map(msg => ({
+          id: crypto.randomUUID(),
+          conversation_id: conversationWithUUID.id,
           text: msg.text,
           sender: msg.sender,
           timestamp: new Date(msg.timestamp).toISOString(),
@@ -174,11 +182,17 @@ export const useChatContext = () => {
         if (msgError) throw msgError;
       }
 
+      // Atualiza o estado com a nova conversa
+      setCurrentConversation(conversationWithUUID);
+      setConversations(prev => [conversationWithUUID, ...prev]);
+
       console.log("Conversation created in database:", convData);
+      return conversationWithUUID;
     } catch (error) {
       console.error("Error creating conversation in database:", error);
       // Fall back to localStorage
       saveConversationsToLocalStorage(conversations, user.id);
+      return conversation;
     }
   };
 
@@ -216,24 +230,31 @@ export const useChatContext = () => {
     }
 
     try {
+      const messageWithUUID = {
+        ...message,
+        id: crypto.randomUUID()
+      };
+
       const { error } = await supabase
         .from('messages')
         .insert({
-          id: message.id,
+          id: messageWithUUID.id,
           conversation_id: conversationId,
-          text: message.text,
-          sender: message.sender,
-          timestamp: new Date(message.timestamp).toISOString(),
-          favorite: message.favorite || false,
-          role: message.sender === "user" ? "user" : "assistant"
+          text: messageWithUUID.text,
+          sender: messageWithUUID.sender,
+          timestamp: new Date(messageWithUUID.timestamp).toISOString(),
+          favorite: messageWithUUID.favorite || false,
+          role: messageWithUUID.sender === "user" ? "user" : "assistant"
         });
 
       if (error) throw error;
       console.log("Message added to database");
+      return messageWithUUID;
     } catch (error) {
       console.error("Error adding message to database:", error);
       // Fall back to localStorage
       saveConversationsToLocalStorage(conversations, user.id);
+      return message;
     }
   };
 
@@ -241,12 +262,20 @@ export const useChatContext = () => {
     console.log("Starting new conversation");
     const newConversation = initializeNewConversation();
     
+    let conversation = newConversation;
     if (user) {
-      await createConversationInDatabase(newConversation);
+      const createdConversation = await createConversationInDatabase(newConversation);
+      if (createdConversation) {
+        conversation = createdConversation;
+      }
     }
     
-    setCurrentConversation(newConversation);
-    setConversations((prev) => [newConversation, ...prev]);
+    setCurrentConversation(conversation);
+    setConversations((prev) => [conversation, ...prev]);
+    
+    if (!user) {
+      saveConversationsToLocalStorage([conversation, ...conversations]);
+    }
   };
 
   const addMessage = async (text: string, sender: "user" | "assistant") => {
@@ -282,13 +311,23 @@ export const useChatContext = () => {
       return;
     }
     
-    const newMessage: Message = {
+    // Criar a nova mensagem com ID único
+    let newMessage: Message = {
       id: Date.now().toString(),
       text,
       sender,
       timestamp: Date.now(),
     };
     
+    // Se um usuário estiver logado, adiciona a mensagem ao banco de dados
+    if (user) {
+      const savedMessage = await addMessageToDatabase(newMessage, currentConversation.id);
+      if (savedMessage) {
+        newMessage = savedMessage;
+      }
+    }
+    
+    // Atualiza a conversa atual com a nova mensagem
     const updatedMessages = [...currentConversation.messages, newMessage];
     const updatedConversation = {
       ...currentConversation,
@@ -296,25 +335,27 @@ export const useChatContext = () => {
       updatedAt: Date.now(),
     };
     
+    // Atualiza o estado
     setCurrentConversation(updatedConversation);
     
+    // Atualiza a lista de conversas
     setConversations((prev) => {
-      // Check if the current conversation already exists in the list
-      const exists = prev.some(conv => conv.id === updatedConversation.id);
+      // Verifica se a conversa atual já existe na lista
+      const conversationIndex = prev.findIndex(conv => conv.id === updatedConversation.id);
       
-      if (exists) {
-        // Update the existing conversation
-        return prev.map((conv) => 
-          conv.id === updatedConversation.id ? updatedConversation : conv
-        );
+      if (conversationIndex !== -1) {
+        // Atualiza a conversa existente
+        const updatedConversations = [...prev];
+        updatedConversations[conversationIndex] = updatedConversation;
+        return updatedConversations;
       } else {
-        // Add the new conversation to the beginning of the list
+        // Adiciona a nova conversa ao início da lista
         return [updatedConversation, ...prev];
       }
     });
     
+    // Atualiza o banco de dados ou localStorage
     if (user) {
-      await addMessageToDatabase(newMessage, currentConversation.id);
       await updateConversationInDatabase(updatedConversation);
     } else {
       saveConversationsToLocalStorage(
