@@ -47,16 +47,25 @@ export const useChatContext = () => {
 
                 if (messagesError) throw messagesError;
 
+                // Validate that sender is either "user" or "assistant"
+                const typedMessages: Message[] = messagesData ? messagesData.map(msg => {
+                  const validSender = msg.sender === "user" || msg.sender === "assistant" 
+                    ? msg.sender as "user" | "assistant" 
+                    : "assistant"; // Fallback to assistant if invalid
+                  
+                  return {
+                    id: msg.id,
+                    text: msg.text,
+                    sender: validSender,
+                    timestamp: new Date(msg.timestamp).getTime(),
+                    favorite: msg.favorite || false
+                  };
+                }) : [];
+
                 return {
                   id: conv.id,
                   title: conv.title,
-                  messages: messagesData ? messagesData.map(msg => ({
-                    id: msg.id,
-                    text: msg.text,
-                    sender: msg.sender,
-                    timestamp: new Date(msg.timestamp).getTime(),
-                    favorite: msg.favorite || false
-                  })) : [],
+                  messages: typedMessages,
                   createdAt: new Date(conv.created_at).getTime(),
                   updatedAt: new Date(conv.updated_at).getTime()
                 };
@@ -64,7 +73,9 @@ export const useChatContext = () => {
             );
 
             setConversations(fullConversations);
-            setCurrentConversation(fullConversations[0]);
+            if (fullConversations.length > 0) {
+              setCurrentConversation(fullConversations[0]);
+            }
           } else {
             // Create a new conversation if none exists
             const newConv = initializeNewConversation();
@@ -497,16 +508,25 @@ export const useChatContext = () => {
           
         if (msgError) throw msgError;
         
+        // Ensure the sender is either "user" or "assistant"
+        const typedMessages: Message[] = messagesData.map(msg => {
+          const validSender = msg.sender === "user" || msg.sender === "assistant" 
+            ? msg.sender as "user" | "assistant" 
+            : "assistant"; // Fallback to assistant if invalid
+          
+          return {
+            id: msg.id,
+            text: msg.text,
+            sender: validSender,
+            timestamp: new Date(msg.timestamp).getTime(),
+            favorite: msg.favorite || false
+          };
+        });
+        
         const conversation: Conversation = {
           id: conversationData.id,
           title: conversationData.title,
-          messages: messagesData.map(msg => ({
-            id: msg.id,
-            text: msg.text,
-            sender: msg.sender,
-            timestamp: new Date(msg.timestamp).getTime(),
-            favorite: msg.favorite || false
-          })),
+          messages: typedMessages,
           createdAt: new Date(conversationData.created_at).getTime(),
           updatedAt: new Date(conversationData.updated_at).getTime()
         };

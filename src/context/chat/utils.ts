@@ -58,7 +58,23 @@ export const getConversationsFromLocalStorage = (userId?: string): Conversation[
       return [];
     }
     
-    const parsedConversations = JSON.parse(storedConversations) as Conversation[];
+    const parsed = JSON.parse(storedConversations);
+    
+    // Ensure that the sender field is either "user" or "assistant"
+    const parsedConversations: Conversation[] = parsed.map((conv: any) => {
+      return {
+        ...conv,
+        messages: conv.messages.map((msg: any) => {
+          return {
+            ...msg,
+            sender: msg.sender === "user" || msg.sender === "assistant" 
+              ? msg.sender 
+              : "assistant" // Fallback to assistant if invalid
+          };
+        })
+      };
+    });
+    
     console.log("Loaded conversations from localStorage:", key, parsedConversations.length);
     return parsedConversations;
   } catch (error) {
