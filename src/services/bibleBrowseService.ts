@@ -125,7 +125,7 @@ const BIBLE_BOOKS_EN: BibleBook[] = [
   { id: "DEU", name: "Deuteronomy", nameLong: "Deuteronomy", chapters: 34 },
   { id: "JOS", name: "Joshua", nameLong: "Joshua", chapters: 24 },
   { id: "JDG", name: "Judges", nameLong: "Judges", chapters: 21 },
-  { id: "RUT", name: "Ruth", nameLong: "Ruth", chapters: 4 },
+  { id: "RUT", name: "Ruth", nameLong: "Rute", chapters: 4 },
   { id: "1SA", name: "1 Samuel", nameLong: "First Samuel", chapters: 31 },
   { id: "2SA", name: "2 Samuel", nameLong: "Second Samuel", chapters: 24 },
   { id: "1KI", name: "1 Kings", nameLong: "First Kings", chapters: 22 },
@@ -148,11 +148,11 @@ const BIBLE_BOOKS_EN: BibleBook[] = [
   { id: "HOS", name: "Hosea", nameLong: "Hosea", chapters: 14 },
   { id: "JOL", name: "Joel", nameLong: "Joel", chapters: 3 },
   { id: "AMO", name: "Amos", nameLong: "Amos", chapters: 9 },
-  { id: "OBA", name: "Obadiah", nameLong: "Obadiah", chapters: 1 },
+  { id: "OBA", name: "Obadias", nameLong: "Obadias", chapters: 1 },
   { id: "JON", name: "Jonah", nameLong: "Jonah", chapters: 4 },
   { id: "MIC", name: "Micah", nameLong: "Micah", chapters: 7 },
   { id: "NAM", name: "Nahum", nameLong: "Nahum", chapters: 3 },
-  { id: "HAB", name: "Habakkuk", nameLong: "Habakkuk", chapters: 3 },
+  { id: "HAB", name: "Habacuque", nameLong: "Habacuque", chapters: 3 },
   { id: "ZEP", name: "Zephaniah", nameLong: "Zephaniah", chapters: 3 },
   { id: "HAG", name: "Haggai", nameLong: "Haggai", chapters: 2 },
   { id: "ZEC", name: "Zechariah", nameLong: "Zechariah", chapters: 14 },
@@ -206,7 +206,7 @@ const BIBLE_BOOKS_PT: BibleBook[] = [
   { id: "1CH", name: "1 Crônicas", nameLong: "Primeiro Crônicas", chapters: 29 },
   { id: "2CH", name: "2 Crônicas", nameLong: "Segundo Crônicas", chapters: 36 },
   { id: "EZR", name: "Esdras", nameLong: "Esdras", chapters: 10 },
-  { id: "NEH", name: "Neemias", nameLong: "Neemias", chapters: 13 },
+  { id: "NEH", name: "Nehemias", nameLong: "Nehemias", chapters: 13 },
   { id: "EST", name: "Ester", nameLong: "Ester", chapters: 10 },
   { id: "JOB", name: "Jó", nameLong: "Jó", chapters: 42 },
   { id: "PSA", name: "Salmos", nameLong: "Salmos", chapters: 150 },
@@ -452,4 +452,58 @@ export const getVerseContent = async (
     const data = await response.json();
     return data.data.content.trim();
   } catch (error) {
-    console.error("Erro ao buscar conteúdo do versículo:",
+    console.error("Erro ao buscar conteúdo do versículo:", error);
+    return "";
+  }
+};
+
+// Função para buscar na Bíblia
+export const searchBible = async (
+  searchTerm: string,
+  language: string = 'pt'
+): Promise<SearchResult[]> => {
+  try {
+    const apiLanguage = getBibleApiLanguage(language);
+    const bibleId = BIBLE_VERSIONS[apiLanguage];
+    const url = `https://api.scripture.api.bible/v1/bibles/${bibleId}/search?query=${encodeURIComponent(searchTerm)}&limit=20`;
+    
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "api-key": getBibleApiKey(),
+        "Content-Type": "application/json",
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Erro ao realizar busca: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    // Verifica se há resultados antes de processá-los
+    if (!data.data || !data.data.verses || data.data.verses.length === 0) {
+      return [];
+    }
+    
+    // Mapeia os resultados para o formato esperado
+    const results: SearchResult[] = data.data.verses.map((verse: any) => {
+      // Extrai o ID do livro, capítulo e versículo da referência
+      const [bookId, chapter, verseNum] = verse.reference.split('.');
+      const book = getBookById(bookId, language);
+      
+      return {
+        book: book?.name || bookId,
+        chapter: parseInt(chapter, 10),
+        verse: parseInt(verseNum, 10),
+        text: verse.text,
+        reference: `${book?.name || bookId} ${chapter}:${verseNum}`
+      };
+    });
+    
+    return results;
+  } catch (error) {
+    console.error("Erro ao buscar na Bíblia:", error);
+    return [];
+  }
+};
