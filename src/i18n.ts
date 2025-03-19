@@ -1,3 +1,4 @@
+
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
@@ -76,7 +77,7 @@ const resources = {
       system: 'System',
     }
   },
-  'pt-BR': {
+  pt: {
     translation: {
       // Textos gerais
       appName: 'Deus é Amor',
@@ -146,6 +147,79 @@ const resources = {
       theme: 'Tema',
       light: 'Claro',
       dark: 'Escuro',
+      system: 'Sistema',
+    }
+  },
+  es: {
+    translation: {
+      // Textos generales
+      appName: 'Dios es Amor',
+      welcome: 'Bienvenido',
+      login: 'Iniciar sesión',
+      register: 'Registrarse',
+      username: 'Nombre de usuario',
+      password: 'Contraseña',
+      confirmPassword: 'Confirmar contraseña',
+      email: 'Correo electrónico',
+      submit: 'Enviar',
+      logout: 'Cerrar sesión',
+      search: 'Buscar',
+      back: 'Volver',
+      loading: 'Cargando',
+
+      // Mensajes
+      loginSuccess: 'Sesión iniciada con éxito',
+      registerSuccess: 'Registro completado con éxito',
+      enterUsername: 'Por favor, ingrese un nombre de usuario',
+      enterPassword: 'Por favor, ingrese una contraseña',
+      enterEmail: 'Por favor, ingrese un correo electrónico',
+      passwordsDoNotMatch: 'Las contraseñas no coinciden',
+      invalidCredentials: 'Credenciales inválidas',
+      
+      // Navegación
+      home: 'Inicio',
+      chat: 'Chat',
+      bible: 'Biblia',
+      settings: 'Configuraciones',
+      
+      // Chat
+      typeMessage: 'Escribe tu mensaje',
+      send: 'Enviar',
+      clearChat: 'Limpiar chat',
+      startConversation: 'Iniciar una nueva conversación',
+
+      // Página de la Biblia
+      bibleBrowser: 'Navegador de la Biblia',
+      bibleBooks: 'Libros de la Biblia',
+      chapter: 'Capítulo',
+      verse: 'Versículo',
+      searchBible: 'Buscar en la Biblia',
+      browse: 'Explorar',
+      searchResults: 'Resultados de la búsqueda',
+      enterSearchTerm: 'Ingrese al menos 3 caracteres para buscar',
+      searching: 'Buscando',
+      noResults: 'No se encontraron resultados',
+      reference: 'Referencia',
+      text: 'Texto',
+
+      // Versículo del día
+      dailyVerse: 'Versículo del Día',
+      shareVerse: 'Compartir Versículo',
+      
+      // Errores
+      error: 'Error',
+      pageNotFound: 'Página no encontrada',
+      returnToHome: 'Volver a la página de inicio',
+      
+      // Confirmar acciones
+      confirm: 'Confirmar',
+      cancel: 'Cancelar',
+      
+      // Configuraciones
+      language: 'Idioma',
+      theme: 'Tema',
+      light: 'Claro',
+      dark: 'Oscuro',
       system: 'Sistema',
     }
   }

@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type SupportedLanguage = "pt" | "en";
+type SupportedLanguage = "pt" | "en" | "es";
 
 const LanguageSelector = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -18,7 +18,13 @@ const LanguageSelector = () => {
   const languages = [
     { code: "pt", name: "Português" },
     { code: "en", name: "English" },
+    { code: "es", name: "Español" }
   ];
+
+  const getLanguageDisplayName = (code: string) => {
+    const lang = languages.find(l => l.code === code);
+    return lang ? lang.name : "English";
+  };
 
   return (
     <DropdownMenu>
@@ -26,7 +32,7 @@ const LanguageSelector = () => {
         <Button variant="ghost" size="sm" className="flex items-center gap-1 hover:bg-sky-50 hover:text-sky-700 transition-colors">
           <Globe className="h-4 w-4" />
           <span className="hidden sm:inline-block font-medium">
-            {language === "pt" ? "Português" : "English"}
+            {getLanguageDisplayName(language)}
           </span>
         </Button>
       </DropdownMenuTrigger>

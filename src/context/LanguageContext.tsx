@@ -75,6 +75,7 @@ export type TranslationKey =
 type TranslationLanguages = {
   pt: string;
   en: string;
+  es: string;
 };
 
 // Interface para o objeto de traduções
@@ -86,11 +87,13 @@ interface Translations {
 const translations: Translations = {
   welcomeMessage: {
     pt: "Bem-vindo(a) ao Deus é Amor!",
-    en: "Welcome to God is Love!"
+    en: "Welcome to God is Love!",
+    es: "¡Bienvenido a Dios es Amor!"
   },
   appDescription: {
     pt: "Um espaço de fé e esperança para o seu dia a dia.",
-    en: "A space of faith and hope for your daily life."
+    en: "A space of faith and hope for your daily life.",
+    es: "Un espacio de fe y esperanza para tu día a día."
   },
   startChat: {
     pt: "Começar Chat",
@@ -372,7 +375,20 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const changeLanguage = useCallback((lang: string) => {
     i18n.changeLanguage(lang);
     setLanguage(lang);
+    localStorage.setItem('language', lang);
   }, []);
+
+  // Detectar o idioma salvo ou do navegador ao iniciar
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('language');
+    if (savedLanguage) {
+      changeLanguage(savedLanguage);
+    } else {
+      const browserLang = navigator.language.split('-')[0];
+      const supportedLang = ['pt', 'en', 'es'].includes(browserLang) ? browserLang : 'en';
+      changeLanguage(supportedLang);
+    }
+  }, [changeLanguage]);
 
   // Function to get translation
   const t = (key: TranslationKey): string => {
@@ -383,7 +399,14 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
     
     const currentLang = language as keyof TranslationLanguages;
-    return translation[currentLang] || translation["en"] || key;
+    if (translation[currentLang]) {
+      return translation[currentLang];
+    }
+    
+    const i18nKey = key.toString();
+    const i18nTranslation = i18n.t(i18nKey);
+    
+    return i18nTranslation !== i18nKey ? i18nTranslation : translation["en"] || key;
   };
 
   return (

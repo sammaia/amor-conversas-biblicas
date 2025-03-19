@@ -43,10 +43,10 @@ const BibleBrowser = () => {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Busca todos os livros da Bíblia
+  // Busca todos os livros da Bíblia no idioma atual
   const { data: books } = useQuery({
-    queryKey: ['bible-books'],
-    queryFn: () => getAllBooks(),
+    queryKey: ['bible-books', language],
+    queryFn: () => getAllBooks(language),
     initialData: []
   });
 
@@ -65,10 +65,18 @@ const BibleBrowser = () => {
   } = useQuery({
     queryKey: ['bible-verses', selectedBook?.id, selectedChapter, language],
     queryFn: () => selectedBook && selectedChapter 
-      ? getVersesForChapter(selectedBook.id, selectedChapter, language === 'pt-BR' ? 'pt' : 'en')
+      ? getVersesForChapter(selectedBook.id, selectedChapter, language)
       : Promise.resolve([]),
     enabled: !!selectedBook && !!selectedChapter,
   });
+
+  // Resetar seleção quando o idioma muda
+  useEffect(() => {
+    setSelectedBook(null);
+    setSelectedChapter(null);
+    setSearchResults([]);
+    setSearchTerm('');
+  }, [language]);
 
   // Função para lidar com a pesquisa
   const handleSearch = async () => {
@@ -76,7 +84,7 @@ const BibleBrowser = () => {
     
     setIsSearching(true);
     try {
-      const results = await searchBible(searchTerm, language === 'pt-BR' ? 'pt' : 'en');
+      const results = await searchBible(searchTerm, language);
       setSearchResults(results);
     } catch (error) {
       console.error("Erro na pesquisa:", error);
